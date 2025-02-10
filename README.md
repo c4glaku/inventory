@@ -1,2 +1,2 @@
 # inventory
-Inventory Management Dashboard
+Simple Inventory Management Dashboard app, utilizing Node.js, Express, PostgreSQL, React and JWT
