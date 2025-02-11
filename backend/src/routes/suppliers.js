@@ -38,7 +38,7 @@ router.post('/', async (req, res, next) => {
         const newSupplier = await db.one(
             `INSERT INTO suppliers
             (name, contact_name, email, phone, address)
-            VALUSE ($1, $2, $3, $4, $5)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *`,
             [name, contact_name, email, phone, address]
         );

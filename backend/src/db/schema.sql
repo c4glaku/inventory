@@ -1,4 +1,26 @@
--- Products table
+-- Drop existing tables and indexes (if they exist) in correct order
+DROP INDEX IF EXISTS idx_products_supplier;
+DROP INDEX IF EXISTS idx_products_sku;
+DROP INDEX IF EXISTS idx_users_username;
+DROP INDEX IF EXISTS idx_users_email;
+
+-- Drop tables in correct order (because of foreign key relationships)
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS suppliers;
+DROP TABLE IF EXISTS users;
+
+-- Create tables fresh
+CREATE TABLE suppliers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    contact_name VARCHAR(100),
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -13,7 +35,6 @@ CREATE TABLE products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Users table for authentication
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -26,7 +47,7 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create indexes for frequently accessed columns
+-- Create indexes
 CREATE INDEX idx_products_supplier ON products(supplier_id);
 CREATE INDEX idx_products_sku ON products(sku);
 CREATE INDEX idx_users_username ON users(username);
