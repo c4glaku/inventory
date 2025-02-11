@@ -1,12 +1,22 @@
-const dotenv = require('dotenv');
+require('dotenv').config();
+
 const express = require('express');
 const { testConnection } = require('./src/config/database');
 
-dotenv.config();
-
+// Initialize express
 const app = express();
 
-const PORT = process.env.PORT;
+// Parse JSON bodies
+app.use(express.json());
+
+// Routes
+const productsRouter = require('./src/routes/products');
+const suppliersRouter = require('./src/routes/suppliers');
+
+app.use('/api/products', productsRouter);
+app.use('/api/suppliers', suppliersRouter);
+
+const PORT = process.env.PORT || 3000;
 
 testConnection()
     .then(connected => {

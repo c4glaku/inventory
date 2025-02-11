@@ -1,5 +1,6 @@
 const pgp = require('pg-promise')();
 require('dotenv').config();
+
 // Database Connection Configuration
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
@@ -9,7 +10,8 @@ const dbConfig = {
     password: process.env.DB_PASSWORD
 };
 
-console.log('Database config:', { ...dbConfig, password: process.env.DB_PASSWORD });
+// for debugging purposes
+// console.log('Database config:', { ...dbConfig, password: process.env.DB_PASSWORD });
 
 // Database Instance
 const db = pgp(dbConfig);
