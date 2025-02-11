@@ -1,2 +1,25 @@
 # Node Modules
 node_modules/
+
+# Environment
+.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Build directories
+dist/
+build/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+.DS_Store

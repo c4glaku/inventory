@@ -1,11 +1,25 @@
-const express = require('express');
 const dotenv = require('dotenv');
+const express = require('express');
+const { testConnection } = require('./src/config/database');
 
 dotenv.config();
 
 const app = express();
 
 const PORT = process.env.PORT;
+
+testConnection()
+    .then(connected => {
+        if (connected) {
+            console.log('Database connection verified');
+            app.listen(PORT, () => {
+                console.log(`Server is running on port ${PORT}`);
+            });
+        } else {
+            console.log('Failed to connect to database');
+            process.exit(1);
+        }
+    });
 
 // JSon Body Parser
 app.use(express.json());
@@ -40,10 +54,6 @@ app.use((err, req, res, next) => {
         status: 'error',
         message: 'Something broke!'
     });
-});
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
 });
 
 // Uncaught Exceptions Handler
