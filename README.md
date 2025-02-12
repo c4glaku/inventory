@@ -1,2 +1,51 @@
-# inventory
-Simple Inventory Management Dashboard app, utilizing Node.js, Express, PostgreSQL, React and JWT
+<h1>Inventory Manager</h1>
+<h3>Simple Inventory Management Dashboard app, utilizing Node.js, Express, PostgreSQL, React and JWT</h3>
+
+<h3>Currently only a barebones backend has been implemented</h3>
+<h4>Last Updated: 2025/02/11</h4>
+
+
+
+<h2>Setup Instrucitons</h2>
+
+<h2>Step 0</h2>
+<h2>Before setting up the inventory manager, make sure to download:</h2>
+<ul><b>PostgreSQL: </b>https://www.postgresql.org/download/</ul>
+<ul><b>Optional but Recommended) Postman (or an equivalent software for testing purposes): </b>https://www.postman.com/downloads/</ul>
+
+<h2>Step 1</h2>
+From the backend directory, run
+
+```console
+npm install
+```
+Once all modules are installed, run
+```console
+node server
+```
+At this point, server should be running on port 3000 (or, any other port if you have configured .env)
+<h2>Step 2</h2>
+At this point, the backend should be up and running. However, database connection is not set up yet. In order to set up a database, simply run psql
+
+```console
+Server [localhost]:
+Database [postgres]: inventory_db
+Port [5432]:
+Username [postgres]:
+Password for user postgres:
+```
+
+Leave Server empty to default to localhost, and similarly leave the fields for Port and Username empty for them to default as well, unless you have a specific set up on your end.
+Enter <b>your password</b> which you should have set up during PostgreSQL installation for the superuser.
+Then you will be met with the psql console, simply run the below commands:
+```
+postgres=# \c inventory_db
+inventory_db=# \i C:/Users/YourUsername/Path/To/Your/backend/src/db/schema.sql
+```
+At this point, the database should be ready for you to use methods on.
+Currently, the manager only supports GET, POST, and PUT methods, you may test them on Postman.
+Endpoints are localhost:3000/api/products and localhost:3000/api/suppliers respectively.
+
+
+
+
