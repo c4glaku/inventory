@@ -1,6 +1,12 @@
 <h1>Inventory Manager</h1>
-<h3>Simple Inventory Management Dashboard app, utilizing Node.js, Express, PostgreSQL, React and JWT</h3>
+<h3>A full-stack inventory management system built with a Node/Express backend, PostgreSQL database, and a React frontend. Features include CRUD operations for products and suppliers, and user authentication using JWT tokens.</h3>
 
+<h2><b>Tech Stack:</b></h2>
+<ul><b>Backend: </b> Node.js, Express, PostgreSQL</ul>
+<ul><b>Frontend: JWT</b> React, Axios, React Router  </ul>
+<ul><b>Authentication: </b> JWT</ul>
+
+<h2>Project Status</h2>
 <h3>Currently only a barebones backend has been implemented</h3>
 <h4>Last Updated: 2025/02/11</h4>
 
