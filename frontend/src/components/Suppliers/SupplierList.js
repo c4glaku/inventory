@@ -1,4 +1,4 @@
-import React, { useState, useEFfect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Table,
     TableBody,
@@ -6,25 +6,41 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    Typography,
     Paper,
     IconButton,
+    CircularProgress,
+    Alert,
+    Box
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import api from '../../api/axios';
 
 const SupplierList = () => {
-    const [suppliers, setSuppliers] = useState();
+    const [suppliers, setSuppliers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    useEFfect(() => {
+    useEffect(() => {
         fetchSuppliers();
     }, []);
 
     const fetchSuppliers = async () => {
         try {
+            setLoading(true);
+            setError(null);
             const response = await api.get('/suppliers');
-            setSuppliers(response.data);
+            console.log('API Response:', response);
+            if (response.data) {
+                setSuppliers(response.data);
+            } else {
+                setError('No data received from server');
+            }
         } catch (error) {
             console.error('Error fetching suppliers:', error);
+            setError(error.message || 'Error fetching suppliers');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -34,39 +50,57 @@ const SupplierList = () => {
             fetchSuppliers();
         } catch (error) {
             console.error('Error deleting supplier:', error);
+            setError(error.message || 'Error deleting supplier');
         }
     };
 
+    if (loading) {
+        return <CircularProgress />;
+    }
+
+    if (error) {
+        return <Alert severity="error">{error}</Alert>;
+    }
+
+    if (!suppliers || suppliers.length === 0) {
+        return <Alert severity="info">No suppliers found</Alert>;
+    }
+
     return (
-        <TableContainer component={Paper}>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Email</TableCell>
-                        <TableCell>Phone</TableCell>
-                        <TableCell>Actions</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {suppliers.map((supplier) => {
-                        return (<TableRow key={supplier.id}>
-                            <TableCell>{supplier.name}</TableCell>
-                            <TableCell>{supplier.email}</TableCell>
-                            <TableCell>{supplier.phone}</TableCell>
-                            <TableCell>
-                                <IconButton>
-                                    <Edit />
-                                </IconButton>
-                                <IconButton onclick={() => handleDelete(supplier.id)}>
-                                    <Delete />
-                                </IconButton>
-                            </TableCell>
-                        </TableRow>);
-                    })}
-                </TableBody>
-            </Table>
-        </TableContainer>
+        <Box>
+            <Typography variant="h5" gutterBottom>
+                Suppliers List
+            </Typography>
+                <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Email</TableCell>
+                            <TableCell>Phone</TableCell>
+                            <TableCell>Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {suppliers.map((supplier) => {
+                            return (<TableRow key={supplier.id}>
+                                <TableCell>{supplier.name}</TableCell>
+                                <TableCell>{supplier.email}</TableCell>
+                                <TableCell>{supplier.phone}</TableCell>
+                                <TableCell>
+                                    <IconButton>
+                                        <Edit />
+                                    </IconButton>
+                                    <IconButton onClick={() => handleDelete(supplier.id)}>
+                                        <Delete />
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>);
+                        })}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Box>
     );
 };
 

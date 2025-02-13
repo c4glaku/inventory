@@ -13,7 +13,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // GET /api/suppliers/:id
-router.get('/id:', async (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
     try {
         const supplier = await db.one('SELECT * FROM suppliers WHERE id = $1', [req.params.id]);
         res.json(supplier);

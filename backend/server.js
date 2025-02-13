@@ -7,8 +7,21 @@ const cors = require('cors');
 // Initialize express
 const app = express();
 
+app.use(cors({
+    origin: 'http://localhost:3001',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 // Parse JSON bodies
 app.use(express.json());
+
+// Logging
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    next();
+});
 
 // Routes
 const productsRouter = require('./src/routes/products');
@@ -32,14 +45,7 @@ testConnection()
         }
     });
 
-// JSon Body Parser
-app.use(express.json());
 
-// Logging
-app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
-});
 
 // Health Check Endpoint
 app.get('/api/health', (req,res) => {
@@ -56,6 +62,10 @@ app.get('/api/health', (req,res) => {
             message: 'Internal server error'
         });
     }
+});
+
+app.get('api/test', (req, res) => {
+    res.json({ message: 'CORS is working' });
 });
 
 // Error Handler
