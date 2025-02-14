@@ -27,10 +27,29 @@ const AddProductForm = ({ onProductsAdded }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await api.post('/products', formData);
+            const formattedData = {
+                name: formData.name,
+                description: formData.description,
+                sku: formData.sku,
+                quantity: parseInt(formData.quantity),
+                unit_price: parseFloat(formData.unit_price),
+                supplier_id: parseInt(formData.supplier_id),
+                min_quantity: parseInt(formData.min_quantity),
+                max_quantity: parseInt(formData.max_quantity),
+            };
+
+            if (isNaN(formattedData.quantity) ||
+                isNaN(formattedData.unit_price) || 
+                isNaN(formattedData.supplier_id) || 
+                isNaN(formattedData.min_quantity) || 
+                isNaN(formattedData.max_quantity)) {
+                throw new Error('Please enter valid numbers for numeric fields');
+            }
+
+            const response = await api.post('/products', formattedData);
             onProductsAdded(response.data);
             setOpen(false);
-            setFormData({ 
+            setFormData({
                 name: '',
                 description: '',
                 sku: '',
@@ -38,10 +57,11 @@ const AddProductForm = ({ onProductsAdded }) => {
                 unit_price: '',
                 supplier_id: '',
                 min_quantity: '',
-                max_quantity: '', 
+                max_quantity: '',
             });
         } catch (error) {
             console.error('Error adding product:', error);
+            alert(error.response?.data?.error || error.message || 'Error adding product');
         }
     };
 
@@ -90,6 +110,8 @@ const AddProductForm = ({ onProductsAdded }) => {
                                 onChange={(e) => setFormData({...formData, quantity: e.target.value})}
                                 margin="normal"
                                 required
+                                type="number"
+                                slotProps={{ min: "0" }}
                         />
                         <TextField
                                 fullWidth
@@ -98,6 +120,8 @@ const AddProductForm = ({ onProductsAdded }) => {
                                 onChange={(e) => setFormData({...formData, unit_price: e.target.value})}
                                 margin="normal"
                                 required
+                                type="number"
+                                slotProps={{ min: "0", step: "0.01" }}
                         />
                         <TextField
                                 fullWidth
@@ -106,6 +130,8 @@ const AddProductForm = ({ onProductsAdded }) => {
                                 onChange={(e) => setFormData({...formData, supplier_id: e.target.value})}
                                 margin="normal"
                                 required
+                                type="number"
+                                slotProps={{ min: "1" }}
                         />
                         <TextField
                                 fullWidth
@@ -114,6 +140,8 @@ const AddProductForm = ({ onProductsAdded }) => {
                                 onChange={(e) => setFormData({...formData, min_quantity: e.target.value})}
                                 margin="normal"
                                 required
+                                type="number"
+                                slotProps={{ min: "0" }}
                         />
                         <TextField
                                 fullWidth
@@ -122,6 +150,8 @@ const AddProductForm = ({ onProductsAdded }) => {
                                 onChange={(e) => setFormData({...formData, max_quantity: e.target.value})}
                                 margin="normal"
                                 required
+                                type="number"
+                                slotProps={{ min: "0" }}
                         />
                     </Box>
                 </DialogContent>
