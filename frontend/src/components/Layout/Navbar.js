@@ -1,27 +1,63 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { 
+    AppBar, 
+    Toolbar, 
+    Typography, 
+    Button, 
+    Box,
+    IconButton,
+    Stack
+} from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 
-const Navbar = () => {
+
+const Navbar = ({ darkMode, toggleDarkMode }) => {
     return (
-        <AppBar position="static">
-            <Toolbar>
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                    Inventory Dashboard
-                </Typography>
-                <Box>
-                    <Button color="inherit" component={RouterLink} to="/">
-                        Dashboard
-                    </Button>
-                    <Button color="inherit" component={RouterLink} to="/products">
-                        Products
-                    </Button>
-                    <Button color="inherit" component={RouterLink} to="/suppliers">
-                        Suppliers
-                    </Button>
-                </Box>
-            </Toolbar>
-        </AppBar>
+        <Box sx={{ flexGrow: 1 }}>
+            <AppBar position="static" sx={{ height: '70px' }}>
+                <Toolbar>
+                    <Inventory2Icon sx={{ fontSize: 40, mr: 2 }} />
+                    <Typography 
+                        variant="h4"
+                        component="div"
+                        sx={{ 
+                            flexGrow: 1,
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontWeight: 600,
+                            letterSpacing: 1
+                        }}
+                    >
+                        Inventory Dashboard
+                    </Typography>
+                    <Stack direction="row" spacing={2}>
+                        <Button color="inherit" component={RouterLink} to="/">
+                            Dashboard
+                        </Button>
+                        <Button color="inherit" component={RouterLink} to="/products">
+                            Products
+                        </Button>
+                        <Button color="inherit" component={RouterLink} to="/suppliers">
+                            Suppliers
+                        </Button>
+                        <IconButton 
+                            color="inherit"
+                            onClick={toggleDarkMode}
+                            sx={{ ml: 2 }}
+                        >
+                            {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+                        </IconButton>
+                    </Stack>
+                </Toolbar>
+            </AppBar>
+            <Box sx={{
+                height: '30px',
+                bgcolor: 'secondary.main',
+                transition: 'background-color 0.3s ease'
+            }} />
+        </Box>
     );
 };
 

@@ -21,6 +21,12 @@ const Dashboard = () => {
                 ]);
 
                 const products = productsRes.data;
+                const suppliers = suppliersRes.data;
+                
+                if (!Array.isArray(products.data) || !Array.isArray(suppliers.data)) {
+                    throw new Error('Invalid data format received from server');
+                }
+
                 const lowStockItems = products.data.filter(
                     (product) => product.quantity <= product.min_quantity
                 );
@@ -35,12 +41,18 @@ const Dashboard = () => {
 
                 setStats({
                     totalProducts: products.data.length,
-                    totalSuppliers: suppliersRes.data.length,
+                    totalSuppliers: suppliers.length,
                     lowStock: lowStockItems.length,
                     productData
                 });
             } catch (error) {
                 console.error('Error fetching dashboard stats:', error);
+                setStats({
+                    totalProducts: 0,
+                    totalSuppliers: 0,
+                    lowStock: 0,
+                    productData: []
+                });
             }
         };
 
@@ -49,21 +61,21 @@ const Dashboard = () => {
 
     return (
         <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} component="div">
                 <Paper sx={{ p:2 }}>
                     <Typography vaiant="h6">Total Products</Typography>
                     <Typography variant="h3">{stats.totalProducts}</Typography>
                 </Paper>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} component="div">
                 <Paper sx={{ p:2 }}>
                     <Typography variant="h6">Total Suppliers</Typography>
                     <Typography variant="h3">{stats.totalSuppliers}</Typography>
                 </Paper>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} component="div">
                 <Paper sx={{ p:2 }}>
                     <Typography variant="h6">Low Stock Items</Typography>
                     <Typography variant="h6" color="error">
@@ -72,7 +84,7 @@ const Dashboard = () => {
                 </Paper>
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item xs={12} md={4} component="div">
                 <Paper sx={{ p:2, height: 300 }}>
                     <Typography variant="h6" gutterBottom>
                         Top 5 Products by Quantity
