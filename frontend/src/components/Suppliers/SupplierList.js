@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import api from '../../api/axios';
+import AddSupplierForm from './AddSupplierForm';
 
 const SupplierList = () => {
     const [suppliers, setSuppliers] = useState([]);
@@ -30,7 +31,7 @@ const SupplierList = () => {
             setLoading(true);
             setError(null);
             const response = await api.get('/suppliers');
-            console.log('API Response:', response);
+            // console.log('API Response:', response);
             if (response.data) {
                 setSuppliers(response.data);
             } else {
@@ -71,7 +72,10 @@ const SupplierList = () => {
             <Typography variant="h5" gutterBottom>
                 Suppliers List
             </Typography>
-                <TableContainer component={Paper}>
+            <AddSupplierForm onSuppliersAdded={(newSupplier) => {
+                setSuppliers([...suppliers, newSupplier]);
+            }} />
+            <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
                         <TableRow>

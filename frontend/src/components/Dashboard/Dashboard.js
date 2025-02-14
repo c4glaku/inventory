@@ -15,16 +15,17 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const [products, suppliers] = await Promise.all([
+                const [productsRes, suppliersRes] = await Promise.all([
                     api.get('/products'),
                     api.get('/suppliers'),
                 ]);
 
+                const products = productsRes.data;
                 const lowStockItems = products.data.filter(
                     (product) => product.quantity <= product.min_quantity
                 );
 
-                const productData = products.Data
+                const productData = products
                     .sort((a,b) => b.quantity - a.quantity)
                     .slice(0,5)
                     .map(product => ({
@@ -34,7 +35,7 @@ const Dashboard = () => {
 
                 setStats({
                     totalProducts: products.data.length,
-                    totalSuppliers: suppliers.data.length,
+                    totalSuppliers: suppliersRes.data.length,
                     lowStock: lowStockItems.length,
                     productData
                 });

@@ -74,9 +74,21 @@ router.put('/:id', async (req, res, next) => {
 // DELETE /api/suppliers/:id
 router.delete('/:id', async (req, res, next) => {
     try {
-        await db.none('DELETE FROM suppliers WHERE id = $1', [req.params.id]);
+        const products = await db.any('SELECT id FROM products WHERE supplier_id = $1', [req.params.id]);
+
+        if (products.length > 0) {
+            return res.status(400).json({
+                error: 'Cannot delete supplier with associated products'
+            });
+        }
+
+        const result = await db.result('DELETE FROM suppliers WHERE id = $1', [req.params.id]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Supplier not found' });
+        }
         res.status(204).send();
     } catch (error) {
+        console.error('Delete error:', error);
         next(error);
     }
 });

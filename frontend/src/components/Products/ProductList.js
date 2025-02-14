@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import api from '../../api/axios';
+import AddProductForm from './AddProductForm';
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -30,7 +31,7 @@ const ProductList = () => {
             setLoading(true);
             setError(null);
             const response = await api.get('/products');
-            console.log('API Response:', response); // for debugging purposes
+            // console.log('API Response:', response); // for debugging purposes
             if (response.data) {
                 setProducts(response.data);
             } else {
@@ -54,16 +55,6 @@ const ProductList = () => {
         }
     };
 
-    /* const handlePost = async(id) => {
-        try {
-            await api.post(`/products/${id}`);
-            fetchProducts();
-        } catch (error) {
-            console.error('Error updating product');
-            setError(error.message || 'Error updating product');
-        }
-    } */
-
     if (loading) {
         return <CircularProgress />;
     }
@@ -81,7 +72,10 @@ const ProductList = () => {
             <Typography variant="h5" gutterBottom>
                 Products List
             </Typography>
-                <TableContainer component={Paper}>
+            <AddProductForm onProductsAdded={(newProduct) => {
+                setProducts([...products, newProduct]);
+            }} />
+            <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
                         <TableRow>
