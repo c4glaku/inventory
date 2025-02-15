@@ -26,9 +26,11 @@ app.use((req, res, next) => {
 // Routes
 const productsRouter = require('./src/routes/products');
 const suppliersRouter = require('./src/routes/suppliers');
+const exportImportRouter = require('./src/routes/export-import');
 
 app.use('/api/products', productsRouter);
 app.use('/api/suppliers', suppliersRouter);
+app.use('/api/export-import', exportImportRouter);
 
 const PORT = process.env.PORT || 3000;
 

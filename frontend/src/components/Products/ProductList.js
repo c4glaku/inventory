@@ -17,6 +17,7 @@ import { Edit, Delete } from '@mui/icons-material';
 import api from '../../api/axios';
 import AddProductForm from './AddProductForm';
 import EditProductForm from './EditProductForm';
+import ExportImport from '../common/ExportImport';
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -85,6 +86,10 @@ const ProductList = () => {
             <Typography variant="h5" gutterBottom>
                 Products List
             </Typography>
+            <ExportImport
+                type="products"
+                onImportSuccess={fetchProducts}
+            />
             <AddProductForm onProductsAdded={(newProduct) => {
                 setProducts([...products, newProduct]);
             }} />

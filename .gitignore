@@ -23,3 +23,7 @@ build/
 .idea/
 *.swp
 .DS_Store
+
+# Misc
+tree.py
+project_structure.txt

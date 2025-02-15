@@ -17,6 +17,7 @@ import { Edit, Delete } from '@mui/icons-material';
 import api from '../../api/axios';
 import AddSupplierForm from './AddSupplierForm';
 import EditSupplierForm from './EditSupplierForm';
+import ExportImport from '../common/ExportImport';
 
 const SupplierList = () => {
     const [suppliers, setSuppliers] = useState([]);
@@ -84,6 +85,10 @@ const SupplierList = () => {
             <Typography variant="h5" gutterBottom>
                 Suppliers List
             </Typography>
+            <ExportImport
+                type="suppliers"
+                onImportSuccess={fetchSuppliers}
+            />
             <AddSupplierForm onSuppliersAdded={(newSupplier) => {
                 setSuppliers([...suppliers, newSupplier]);
             }} />

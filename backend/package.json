@@ -12,8 +12,11 @@
   "dependencies": {
     "backend": "file:",
     "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "csv-writer": "^1.6.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
     "pg": "^8.13.1",
     "pg-promise": "^11.10.2"
   }
