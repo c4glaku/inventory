@@ -16,11 +16,13 @@ import {
 import { Edit, Delete } from '@mui/icons-material';
 import api from '../../api/axios';
 import AddProductForm from './AddProductForm';
+import EditProductForm from './EditProductForm';
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [editingProduct, setEditingProduct] = useState(null);
 
     useEffect(() => {
         fetchProducts();
@@ -53,6 +55,17 @@ const ProductList = () => {
             console.error('Error deleting product:', error);
             setError(error.message || 'Error deleting product');
         }
+    };
+
+    const handleEdit = (product) => {
+        console.log('Editing product:', product);
+        setEditingProduct(product);
+    };
+
+    const handleProductUpdated = (updatedProduct) => {
+        setProducts(products.map(p => 
+            p.id === updatedProduct.id ? updatedProduct : p
+        ));
     };
 
     if (loading) {
@@ -95,7 +108,7 @@ const ProductList = () => {
                                 <TableCell>{product.quantity}</TableCell>
                                 <TableCell>{product.unit_price}</TableCell>
                                 <TableCell>
-                                    <IconButton>
+                                    <IconButton onClick={() => handleEdit(product)}>
                                         <Edit />
                                     </IconButton>
                                     <IconButton onClick={() => handleDelete(product.id)}>
@@ -108,6 +121,14 @@ const ProductList = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            {editingProduct && (
+                <EditProductForm
+                    product={editingProduct}
+                    open={Boolean(editingProduct)}
+                    onProductUpdated={handleProductUpdated}
+                    onClose={() => setEditingProduct(null)}
+                />
+            )}
         </Box>
     );
 };

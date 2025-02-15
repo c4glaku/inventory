@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Grid2 as Grid, Paper, Typography, Box } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../api/axios';
-
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -17,42 +16,34 @@ const Dashboard = () => {
             try {
                 const [productsRes, suppliersRes] = await Promise.all([
                     api.get('/products'),
-                    api.get('/suppliers'),
+                    api.get('/suppliers')
                 ]);
 
                 const products = productsRes.data;
                 const suppliers = suppliersRes.data;
-                
-                if (!Array.isArray(products.data) || !Array.isArray(suppliers.data)) {
-                    throw new Error('Invalid data format received from server');
-                }
 
-                const lowStockItems = products.data.filter(
-                    (product) => product.quantity <= product.min_quantity
+                const lowStockItems = products.filter(
+                    product => product.quantity <= product.min_quantity
                 );
-
-                const productData = products
-                    .sort((a,b) => b.quantity - a.quantity)
-                    .slice(0,5)
+                
+                const productData = [...products]
+                    .sort((a, b) => b.quantity - a.quantity)
+                    .slice(0, 5)
                     .map(product => ({
-                        name: product.name,
+                        name: product.name.length > 15 
+                            ? product.name.substring(0, 15) + '...' 
+                            : product.name,
                         quantity: product.quantity
                     }));
 
                 setStats({
-                    totalProducts: products.data.length,
+                    totalProducts: products.length,
                     totalSuppliers: suppliers.length,
                     lowStock: lowStockItems.length,
                     productData
                 });
             } catch (error) {
                 console.error('Error fetching dashboard stats:', error);
-                setStats({
-                    totalProducts: 0,
-                    totalSuppliers: 0,
-                    lowStock: 0,
-                    productData: []
-                });
             }
         };
 
@@ -61,46 +52,50 @@ const Dashboard = () => {
 
     return (
         <Grid container spacing={3}>
-            <Grid item xs={12} md={4} component="div">
-                <Paper sx={{ p:2 }}>
-                    <Typography vaiant="h6">Total Products</Typography>
+            <Grid item xs={12} md={4}>
+                <Paper sx={{ p: 3, textAlign: 'center', height: '100%' }}>
+                    <Typography variant="h6" gutterBottom>Total Products</Typography>
                     <Typography variant="h3">{stats.totalProducts}</Typography>
                 </Paper>
             </Grid>
 
-            <Grid item xs={12} md={4} component="div">
-                <Paper sx={{ p:2 }}>
-                    <Typography variant="h6">Total Suppliers</Typography>
+            <Grid item xs={12} md={4}>
+                <Paper sx={{ p: 3, textAlign: 'center', height: '100%' }}>
+                    <Typography variant="h6" gutterBottom>Total Suppliers</Typography>
                     <Typography variant="h3">{stats.totalSuppliers}</Typography>
                 </Paper>
             </Grid>
 
-            <Grid item xs={12} md={4} component="div">
-                <Paper sx={{ p:2 }}>
-                    <Typography variant="h6">Low Stock Items</Typography>
-                    <Typography variant="h6" color="error">
-                        {stats.lowStockItems}
-                    </Typography>
+            <Grid item xs={12} md={4}>
+                <Paper sx={{ p: 3, textAlign: 'center', height: '100%' }}>
+                    <Typography variant="h6" gutterBottom>Low Stock Items</Typography>
+                    <Typography variant="h3" color="error.main">{stats.lowStock}</Typography>
                 </Paper>
             </Grid>
 
-            <Grid item xs={12} md={4} component="div">
-                <Paper sx={{ p:2, height: 300 }}>
+            <Grid item xs={12}>
+                <Paper sx={{ p: 3, height: 400 }}>
                     <Typography variant="h6" gutterBottom>
                         Top 5 Products by Quantity
                     </Typography>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={stats.productData}>
-                            <CartesianGrid strokeDasharray='3 3' />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar dataKey="quantity" fill="#1976d2" />
-                        </BarChart>
-                    </ResponsiveContainer>
+                    <Box sx={{ width: '100%', height: 300 }}>
+                        <ResponsiveContainer>
+                            <BarChart data={stats.productData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis 
+                                    dataKey="name"
+                                    angle={-45}
+                                    textAnchor="end"
+                                    height={70}
+                                />
+                                <YAxis />
+                                <Tooltip />
+                                <Bar dataKey="quantity" fill="#FF8C00" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </Box>
                 </Paper>
             </Grid>
-
         </Grid>
     );
 };

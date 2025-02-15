@@ -61,7 +61,8 @@ router.put('/:id', async (req, res, next) => {
             WHERE id = $6
             RETURNING *`,
             [name, contact_name, email, phone, address, req.params.id]
-        )
+        );
+        res.json(updatedSupplier);
     } catch (error) {
         if (error.code === 0) {
             res.status(404).json({ error: 'Supplier not found' });

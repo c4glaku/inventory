@@ -1,11 +1,18 @@
 import { createTheme } from '@mui/material/styles';
 
+const commonPalette = {
+    primary: {
+        main: '#FF8C00',
+        light: '#FFB74D',
+        dark: '#F57C00',
+        contrastText: '#FFFFFF'
+    }
+};
+
 export const lightTheme = createTheme({
     palette: {
         mode: 'light',
-        primary: {
-            main: '#FF8C00',
-        },
+        ...commonPalette,
         secondary: {
             main: '#1a237e',
         },
@@ -19,9 +26,7 @@ export const lightTheme = createTheme({
 export const darkTheme = createTheme({
     palette: {
         mode: 'dark',
-        primary: {
-            main: '#FF8C00',
-        },
+        ...commonPalette,
         secondary: {
             main: '#9c27b0',
         },

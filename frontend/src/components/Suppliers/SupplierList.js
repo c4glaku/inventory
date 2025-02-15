@@ -16,11 +16,13 @@ import {
 import { Edit, Delete } from '@mui/icons-material';
 import api from '../../api/axios';
 import AddSupplierForm from './AddSupplierForm';
+import EditSupplierForm from './EditSupplierForm';
 
 const SupplierList = () => {
     const [suppliers, setSuppliers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [editingSupplier, setEditingSupplier] = useState(null);
 
     useEffect(() => {
         fetchSuppliers();
@@ -53,6 +55,16 @@ const SupplierList = () => {
             console.error('Error deleting supplier:', error);
             setError(error.message || 'Error deleting supplier');
         }
+    };
+
+    const handleEdit = (supplier) => {
+        setEditingSupplier(supplier);
+    };
+
+    const handleSupplierUpdated = (updatedSupplier) => {
+        setSuppliers(suppliers.map(s =>
+            s.id === updatedSupplier.id ? updatedSupplier : s
+        ));
     };
 
     if (loading) {
@@ -92,7 +104,7 @@ const SupplierList = () => {
                                 <TableCell>{supplier.email}</TableCell>
                                 <TableCell>{supplier.phone}</TableCell>
                                 <TableCell>
-                                    <IconButton>
+                                    <IconButton onClick={() => handleEdit(supplier)}>
                                         <Edit />
                                     </IconButton>
                                     <IconButton onClick={() => handleDelete(supplier.id)}>
@@ -104,6 +116,13 @@ const SupplierList = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            {editingSupplier && (
+                <EditSupplierForm
+                    supplier={editingSupplier}
+                    onSupplierUpdated={handleSupplierUpdated}
+                    onClose={() => setEditingSupplier(null)}
+                />
+            )}
         </Box>
     );
 };

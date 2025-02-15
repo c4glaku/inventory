@@ -88,6 +88,15 @@ router.put('/:id', async (req, res, next) => {
     try {
         const { name, description, sku, quantity, unit_price, supplier_id, min_quantity, max_quantity } = req.body;
 
+        if (!name || !sku) {
+            return res.status(400).json({ error: 'Name and SKU are required' });
+        }
+
+        if (isNaN(quantity) || isNaN(unit_price) || isNaN(min_quantity) || isNaN(max_quantity)) { 
+            return res.status(400).json({ error: 'Invalid numeric values provided' });
+        }
+
+        const supplierExists = await db.oneOrNone('SELECT id FROM suppliers WHERE id = $1', [supplier_id]);
         const updatedProduct = await db.one(
             `UPDATE products
             SET name = $1, description = $2, sku = $3, quantity = $4,
