@@ -8,6 +8,7 @@
 
 <h2>Project Status</h2>
 <h3>Added final touches to the development build, now also supports import/export with JSON and csv files.</h3>
+<h3>To add: JWT authentication</h3>
 <h4>Last Updated: 2025/02/19</h4>
 
 
