@@ -7,8 +7,8 @@
 <ul><b>Authentication: </b> JWT</ul>
 
 <h2>Project Status</h2>
-<h3>Currently only a barebones backend has been implemented</h3>
-<h4>Last Updated: 2025/02/11</h4>
+<h3>Added final touches to the development build, now also supports import/export with JSON and csv files.</h3>
+<h4>Last Updated: 2025/02/19</h4>
 
 
 
@@ -52,6 +52,17 @@ At this point, the database should be ready for you to use methods on.
 Currently, the manager only supports GET, POST, and PUT methods, you may test them on Postman.
 Endpoints are localhost:3000/api/products and localhost:3000/api/suppliers respectively.
 
+<h2>Step 3: Setting up the Frontend Client</h2>
+From the frontend directory, run
+```console
+npm install
+```
 
+<h2>Step 4</h2>
+Once all installs are done, run
+```console
+npm start
+```
+This starts the development build. Currently the app is still in development, but stay tuned for a full release!
 
 
