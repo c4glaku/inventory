@@ -8,6 +8,8 @@ import Dashboard from './components/Dashboard/Dashboard';
 import SupplierList from './components/Suppliers/SupplierList';
 import { lightTheme, darkTheme } from './theme/theme';
 
+// Hello there
+
 function App() {
   const [darkMode, setDarkMode] = React.useState(false);
 

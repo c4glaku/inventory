@@ -30,7 +30,7 @@ const exportImportRouter = require('./src/routes/export-import');
 
 app.use('/api/products', productsRouter);
 app.use('/api/suppliers', suppliersRouter);
-app.use('/api/export-import', exportImportRouter);
+app.use('/api', exportImportRouter);
 
 const PORT = process.env.PORT || 3000;
 
