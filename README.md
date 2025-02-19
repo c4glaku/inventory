@@ -55,15 +55,19 @@ Endpoints are localhost:3000/api/products and localhost:3000/api/suppliers respe
 
 <h2>Step 3: Setting up the Frontend Client</h2>
 From the frontend directory, run
-```console
-npm install
-```
 
-<h2>Step 4</h2>
-Once all installs are done, run
 ```console
 npm start
 ```
+
+
+<h2>Step 4</h2>
+Once all installs are done, run
+
+```console
+npm start
+```
+
 This starts the development build. Currently the app is still in development, but stay tuned for a full release!
 
 
