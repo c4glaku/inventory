@@ -57,7 +57,7 @@ Endpoints are localhost:3000/api/products and localhost:3000/api/suppliers respe
 From the frontend directory, run
 
 ```console
-npm start
+npm install
 ```
 
 
