@@ -53,14 +53,16 @@ const ExportImport = ({ type, onImportSuccess }) => {
     };
 
     const handleImport = async (event) => {
-        const file = event.taget.files[0];
+        const file = event.target.files[0];
         if (!file) return;
-
+    
         setImporting(true);
         setError(null);
-
+    
+        console.log('File type:', file.type, 'File name:', file.name);
+    
         try {
-            if (file.type === 'applicaiton/json') {
+            if (file.type === 'application/json') {
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     try {

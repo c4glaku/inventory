@@ -8,13 +8,16 @@ import Dashboard from './components/Dashboard/Dashboard';
 import SupplierList from './components/Suppliers/SupplierList';
 import { lightTheme, darkTheme } from './theme/theme';
 
-// Hello there
-
 function App() {
-  const [darkMode, setDarkMode] = React.useState(false);
+  const [darkMode, setDarkMode] = React.useState(() => {
+    const storedPreference = localStorage.getItem('darkMode');
+    return storedPreference ? JSON.parse(storedPreference) : false;
+  });
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', JSON.stringify(newDarkMode));
   };
 
   return (
