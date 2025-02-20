@@ -73,15 +73,11 @@ const SupplierList = () => {
     }
 
     if (error) {
-        return <Alert severity="error">{error}</Alert>;
-    }
-
-    if (!suppliers || suppliers.length === 0) {
-        return <Alert severity="info">No suppliers found</Alert>;
+        return  <Alert severity="error">{error}</Alert>;
     }
 
     return (
-        <Box>
+        <Box position="static" height="800px">
             <Typography variant="h5" gutterBottom>
                 Suppliers List
             </Typography>
@@ -92,35 +88,39 @@ const SupplierList = () => {
             <AddSupplierForm onSuppliersAdded={(newSupplier) => {
                 setSuppliers([...suppliers, newSupplier]);
             }} />
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Email</TableCell>
-                            <TableCell>Phone</TableCell>
-                            <TableCell>Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {suppliers.map((supplier) => {
-                            return (<TableRow key={supplier.id}>
-                                <TableCell>{supplier.name}</TableCell>
-                                <TableCell>{supplier.email}</TableCell>
-                                <TableCell>{supplier.phone}</TableCell>
-                                <TableCell>
-                                    <IconButton onClick={() => handleEdit(supplier)}>
-                                        <Edit />
-                                    </IconButton>
-                                    <IconButton onClick={() => handleDelete(supplier.id)}>
-                                        <Delete />
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>);
-                        })}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            {(!suppliers || suppliers.length === 0) ? (
+                <Alert severity="info">No suppliers found</Alert>
+            ) : (
+                <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Email</TableCell>
+                                <TableCell>Phone</TableCell>
+                                <TableCell>Actions</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {suppliers.map((supplier) => {
+                                return (<TableRow key={supplier.id}>
+                                    <TableCell>{supplier.name}</TableCell>
+                                    <TableCell>{supplier.email}</TableCell>
+                                    <TableCell>{supplier.phone}</TableCell>
+                                    <TableCell>
+                                        <IconButton onClick={() => handleEdit(supplier)}>
+                                            <Edit />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleDelete(supplier.id)}>
+                                            <Delete />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>);
+                            })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )}
             {editingSupplier && (
                 <EditSupplierForm
                     supplier={editingSupplier}

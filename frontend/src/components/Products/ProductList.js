@@ -77,12 +77,8 @@ const ProductList = () => {
         return <Alert severity="error">{error}</Alert>;
     }
 
-    if (!products || products.length === 0) {
-        return <Alert severity="info">No products found</Alert>;
-    }
-
     return (
-        <Box>
+        <Box position="static" height="800px">
             <Typography variant="h5" gutterBottom>
                 Products List
             </Typography>
@@ -93,39 +89,43 @@ const ProductList = () => {
             <AddProductForm onProductsAdded={(newProduct) => {
                 setProducts([...products, newProduct]);
             }} />
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>SKU</TableCell>
-                            <TableCell>Quantity</TableCell>
-                            <TableCell>Unit Price</TableCell>
-                            <TableCell>Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {products.map((product) => {
-                            return (
-                                <TableRow key={product.id}>
-                                <TableCell>{product.name}</TableCell>
-                                <TableCell>{product.sku}</TableCell>
-                                <TableCell>{product.quantity}</TableCell>
-                                <TableCell>{product.unit_price}</TableCell>
-                                <TableCell>
-                                    <IconButton onClick={() => handleEdit(product)}>
-                                        <Edit />
-                                    </IconButton>
-                                    <IconButton onClick={() => handleDelete(product.id)}>
-                                        <Delete />
-                                    </IconButton>
-                                </TableCell>
+            {(!products || products.length === 0) ? (
+                <Alert severity="info">No products found</Alert>
+            ) : (
+                <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Name</TableCell>
+                                <TableCell>SKU</TableCell>
+                                <TableCell>Quantity</TableCell>
+                                <TableCell>Unit Price</TableCell>
+                                <TableCell>Actions</TableCell>
                             </TableRow>
-                            ) 
-                        })}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                            {products.map((product) => {
+                                return (
+                                    <TableRow key={product.id}>
+                                    <TableCell>{product.name}</TableCell>
+                                    <TableCell>{product.sku}</TableCell>
+                                    <TableCell>{product.quantity}</TableCell>
+                                    <TableCell>{product.unit_price}</TableCell>
+                                    <TableCell>
+                                        <IconButton onClick={() => handleEdit(product)}>
+                                            <Edit />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleDelete(product.id)}>
+                                            <Delete />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                                ) 
+                            })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )}
             {editingProduct && (
                 <EditProductForm
                     product={editingProduct}
