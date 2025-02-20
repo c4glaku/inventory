@@ -9,13 +9,17 @@ const JWT_SECRET = process.env.JWT_SECRET;
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
 
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+    }
+
     try {
         const userExists = await db.query(
             'SELECT * FROM users WHERE username = $1',
             [username]
         );
 
-        if (userExists.rows.length > 0) {
+        if (userExists.length > 0) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
@@ -23,13 +27,14 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = await db.query(
-            'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username',
+            'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
             [username, hashedPassword]
         );
 
         const payload = {
             user: {
-                id: newUser.rows[0].id
+                id: newUser[0].id,
+                username: newUser[0].username
             }
         };
 
@@ -57,12 +62,11 @@ router.post('/login', async (req, res) => {
             [username]
         );
 
-        if (user.rows.length === 0) {
+        if (user.length === 0) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Validate password
-        const isMatch = await bcrypt.compare(password, user.rows[0].password);
+        const isMatch = await bcrypt.compare(password, user[0].password_hash);
 
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials' });
@@ -70,7 +74,8 @@ router.post('/login', async (req, res) => {
 
         const payload = {
             user: {
-                id: user.rows[0].id
+                id: user[0].id,
+                username: user[0].username
             }
         };
 
