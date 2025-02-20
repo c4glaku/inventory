@@ -9,6 +9,13 @@ DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS suppliers;
 DROP TABLE IF EXISTS users;
 
+CREATE TABLE users {
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL, 
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+};
+
 -- Create tables fresh
 CREATE TABLE suppliers (
     id SERIAL PRIMARY KEY,
