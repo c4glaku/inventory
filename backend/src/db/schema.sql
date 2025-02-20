@@ -2,12 +2,18 @@
 DROP INDEX IF EXISTS idx_products_supplier;
 DROP INDEX IF EXISTS idx_products_sku;
 DROP INDEX IF EXISTS idx_users_username;
-DROP INDEX IF EXISTS idx_users_email;
 
 -- Drop tables in correct order (because of foreign key relationships)
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS suppliers;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users CASCADE;
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- Create tables fresh
 CREATE TABLE suppliers (
@@ -35,20 +41,7 @@ CREATE TABLE products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'user',
-    is_active BOOLEAN DEFAULT true,
-    last_login TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Create indexes
 CREATE INDEX idx_products_supplier ON products(supplier_id);
 CREATE INDEX idx_products_sku ON products(sku);
 CREATE INDEX idx_users_username ON users(username);
-CREATE INDEX idx_users_email ON users(email);
