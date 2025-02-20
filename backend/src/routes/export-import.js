@@ -138,12 +138,14 @@ router.post('/import/csv/:type', upload.single('file'), async (req, res) => {
     try {
         await new Promise((resolve, reject) => {
             fs.createReadStream(req.file.path)
-                .pipe(csv())
+                .pipe(csv({ utf8BOM: true }))
                 .on('data', (data) => results.push(data))
                 .on('end', () => resolve())
                 .on('error', (error) => reject(error));
         });
         
+        // console.log('Parsed CSV Data:', results);   // Debugging
+
         const client = await db.connect();
 
         try {
@@ -166,7 +168,13 @@ router.post('/import/csv/:type', upload.single('file'), async (req, res) => {
                             `INSERT INTO suppliers
                             (name, contact_name, email, phone, address)
                             VALUES ($1, $2, $3, $4, $5)`,
-                            [item.Name, item['Contact Name'], item.Email, item.Phone, item.Address]
+                            [
+                                item.name || item.Name || item['Contact Name'],
+                                item.contact_name || item['Contact Name'],
+                                item.email || item.Email,
+                                item.phone || item.Phone,
+                                item.address || item.Address
+                            ]
                         );
                     }
                 }
@@ -187,4 +195,5 @@ router.post('/import/csv/:type', upload.single('file'), async (req, res) => {
         });
     }
 });
+
 module.exports = router;

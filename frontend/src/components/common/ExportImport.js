@@ -19,6 +19,7 @@ const ExportImport = ({ type, onImportSuccess }) => {
     const [importDialogOpen, setImportDialogOpen] = useState(false);
 
     const handleExport = async (format) => {
+        setError(null);
         try {
             console.log(`Attempting ${format} export for type: ${type}`); // Debugging
             console.log('API URL:', `/export/${format}/${type}`);     // Debugging
@@ -59,10 +60,11 @@ const ExportImport = ({ type, onImportSuccess }) => {
         setImporting(true);
         setError(null);
     
-        console.log('File type:', file.type, 'File name:', file.name);
+        // console.log('File type:', file.type, 'File name:', file.name); // debugging
     
         try {
-            if (file.type === 'application/json') {
+            if (file.type === 'application/json' ||
+                file.name.toLowerCase().endsWith('.json')) {
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     try {
@@ -78,7 +80,11 @@ const ExportImport = ({ type, onImportSuccess }) => {
                     }
                 };
                 reader.readAsText(file);
-            } else if (file.type === 'text/csv') {
+            } else if (
+                file.type === 'text/csv' || 
+                file.type === 'application/vnd.ms-excel' || 
+                file.name.toLowerCase().endsWith('.csv')
+                ) {
                 const formData = new FormData();
                 formData.append('file', file);
                 await api.post(`/import/csv/${type}`, formData, {
