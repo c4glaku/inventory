@@ -128,6 +128,8 @@ router.post('/import/json/:type', async (req, res) => {
 });
 
 router.post('/import/csv/:type', upload.single('file'), async (req, res) => {
+    console.log('CSV import route hit!');
+
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
     }
@@ -143,8 +145,8 @@ router.post('/import/csv/:type', upload.single('file'), async (req, res) => {
                 .on('end', () => resolve())
                 .on('error', (error) => reject(error));
         });
-        
-        // console.log('Parsed CSV Data:', results);   // Debugging
+
+        console.log('Parsed CSV Data:', results); 
 
         const client = await db.connect();
 
@@ -152,24 +154,42 @@ router.post('/import/csv/:type', upload.single('file'), async (req, res) => {
             await client.tx(async t => {
                 if (type === 'products') {
                     for (const item of results) {
+                        console.log('Processing item:', item);
+
+                        const name = item.Name || item.name;
+                        const description = item.Description || item.description;
+                        const sku = item.SKU || item.sku;
+                        const quantity = parseInt(item.Quantity || item.quantity);
+                        const unitPrice = parseFloat(item['Unit Price'] || item['unit_price'] || item.unitPrice || item['Unit price']);
+                        const supplierId = parseInt(item['Supplier ID'] || item['supplier_id'] || item.supplierId || item['Supplier id']);
+                        const minQuantity = parseInt(item['Min Quantity'] || item['min_quantity'] || item.minQuantity || item['Min quantity']);
+                        const maxQuantity = parseInt(item['Max Quantity'] || item['max_quantity'] ||item.maxQuantity || item['Max quantity']);
+                        
+                        console.log('name:', name);
+                        console.log('description:', description);
+                        console.log('sku:', sku);
+                        console.log('quantity:', quantity);
+                        console.log('unitPrice:', unitPrice);
+                        console.log('supplierId:', supplierId);
+                        console.log('minQuantity:', minQuantity);
+                        console.log('maxQuantity:', maxQuantity);
+
                         await t.none(
                             `INSERT INTO products
                             (name, description, sku, quantity, unit_price, supplier_id, min_quantity, max_quantity)
                             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-                            [item.Name, item.Description, item.SKU, 
-                            parseInt(item.Quantity), parseFloat(item['Unit Price']), 
-                            parseInt(item['Supplier ID']), parseInt(item['Min Quantity']), 
-                            parseInt(item['Max Quantity'])]
+                            [name, description, sku, quantity, unitPrice, supplierId, minQuantity, maxQuantity]
                         );
                     }
                 } else if (type === 'suppliers') {
                     for (const item of results) {
+                        console.log("suppliers item is ", item);
                         await t.none(
                             `INSERT INTO suppliers
                             (name, contact_name, email, phone, address)
                             VALUES ($1, $2, $3, $4, $5)`,
                             [
-                                item.name || item.Name || item['Contact Name'],
+                                item.name || item.Name,
                                 item.contact_name || item['Contact Name'],
                                 item.email || item.Email,
                                 item.phone || item.Phone,
@@ -188,7 +208,8 @@ router.post('/import/csv/:type', upload.single('file'), async (req, res) => {
             });
         }
     } catch (error) {
-        console.error('CSV Import error:', error);
+        console.error('CSV Import error:', error); 
+        console.error(error.stack);
         res.status(500).json({ error: 'CSV Import failed' });
         fs.unlink(req.file.path, (err) => {
             if (err) console.error('Error deleting temporary file:', err);

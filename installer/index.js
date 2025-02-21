@@ -3,31 +3,37 @@ const shell = require('shelljs');
 const { setupDatabase } = require('./setup-database');
 const axios = require('axios');
 const { spawn } = require('child_process');
-const { start } = require('repl');
 
-shell.exec('npm install concurrently --save-dev');
-shell.cd('backend');
-shell.exec('npm install');
-shell.cd('../frontend');
-shell.exec('npm install');
-shell.cd('..');
+const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 async function startServerTemporarily() {
     return new Promise((resolve, reject) => {
-        const server = spawn('node', ['server.js'], { cwd: './backend' });
+        const server = spawn(npmCmd, ['run', 'start'], { cwd: './backend', stdio: 'pipe' }); // Use npm start, more reliable
 
         server.stdout.on('data', (data) => {
-            if (data.toString().includes('Server is running on port 3000')) {
+            const output = data.toString();
+            console.log(`Server Output: ${output}`);
+            if (output.includes('Server is running on port 3000')) {
                 resolve(server);
             }
         });
 
+        server.stderr.on('data', (data) => {
+            console.error(`Server Error: ${data.toString()}`);
+        });
+
+
         server.on('error', (err) => {
             reject(err);
         });
+
+        server.on('close', (code) => {
+            if (code !== 0) {
+                reject(new Error(`Server exited with code ${code}`));
+            }
+        })
     });
 }
-
 
 inquirer.prompt([
     {
@@ -40,7 +46,7 @@ inquirer.prompt([
         name: 'JWT_SECRET',
         message: 'Enter JWT secret key:',
     }
-]).then(async (answers) =>{
+]).then(async (answers) => {
     const backendEnv = `
         PORT=3000
         DB_HOST=localhost
@@ -60,7 +66,14 @@ inquirer.prompt([
     await setupDatabase(answers.DB_PASSWORD);
 
     console.log('Starting temporary server for registration...');
-    const tempServer = await startServerTemporarily();
+    let tempServer;
+    try {
+        tempServer = await startServerTemporarily();
+    } catch (error) {
+        console.error("Failed to start temporary server:", error)
+        process.exit(1);
+    }
+
 
     const { username, password } = await inquirer.prompt([
         { type: 'input', name: 'username', message: 'Admin username:' },
@@ -70,17 +83,33 @@ inquirer.prompt([
     try {
         await axios.post('http://localhost:3000/api/auth/register', { username, password });
         console.log('Admin user registered successfully!');
-
-        tempServer.kill();
-
-        console.log('Starting the application...');
-        shell.exec('npx concurrently "cd backend && npm start" "cd frontend && npm start"');
     } catch (err) {
         console.error('Registration failed:', err.message);
         if (err.response) {
             console.error('Server response:', err.response.data);
         }
-        tempServer.kill();
-        process.exit(1);
+        tempServer.kill();  
+        process.exit(1); 
+    } finally {
+        if (tempServer) { 
+            tempServer.kill(); 
+        }
     }
+
+    console.log('Starting the application...');
+
+    const startBackend = spawn(npmCmd, ['start'], { cwd: './backend', stdio: 'inherit', shell: true });  // Inherit stdio for full output
+    const startFrontend = spawn(npmCmd, ['start'], { cwd: './frontend', stdio: 'inherit', shell: true });
+
+    startBackend.on('error', (err) => {
+        console.error('Backend start error:', err);
+    });
+
+    startFrontend.on('error', (err) => {
+        console.error('Frontend start error:', err);
+    });
+
+
+}).catch(err => {
+    console.error("Prompt error:", err);
 });

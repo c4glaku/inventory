@@ -73,8 +73,8 @@ const Dashboard = () => {
                 </Paper>
             </Grid>
 
-            <Grid item xs={12}>
-                <Paper sx={{ p: 3, height: 400 }}>
+            <Grid item xs={12} md={6} lg={4}>
+                <Paper sx={{ p: 3, height: 400, width: 470 }}>
                     <Typography variant="h6" gutterBottom>
                         Top 5 Products by Quantity
                     </Typography>
@@ -86,7 +86,8 @@ const Dashboard = () => {
                                     dataKey="name"
                                     angle={-45}
                                     textAnchor="end"
-                                    height={70}
+                                    
+                                    height={100}
                                 />
                                 <YAxis />
                                 <Tooltip />
