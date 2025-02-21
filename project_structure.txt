@@ -66,6 +66,4 @@ inventory/
 ├── inventory-installer.exe
 ├── output_file.txt
 ├── package-lock.json
-├── package.json
-├── project_structure.txt
-└── tree.py
+└── package.json
