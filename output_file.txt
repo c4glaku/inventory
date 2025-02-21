@@ -1,0 +1,71 @@
+inventory/
+├── backend
+    ├── src
+    │   ├── config
+    │   │   └── database.js
+    │   ├── db
+    │   │   └── schema.sql
+    │   ├── middleware
+    │   │   └── auth.js
+    │   └── routes
+    │   │   ├── auth.js
+    │   │   ├── export-import.js
+    │   │   ├── products.js
+    │   │   └── suppliers.js
+    ├── tmp
+    │   └── csv
+    ├── package-lock.json
+    ├── package.json
+    └── server.js
+├── frontend
+    ├── public
+    │   ├── favicon.ico
+    │   ├── index.html
+    │   ├── logo192.png
+    │   ├── logo512.png
+    │   ├── manifest.json
+    │   └── robots.txt
+    ├── src
+    │   ├── api
+    │   │   └── axios.js
+    │   ├── components
+    │   │   ├── Auth
+    │   │   │   ├── Login.js
+    │   │   │   └── ProtectedRoute.js
+    │   │   ├── Dashboard
+    │   │   │   └── Dashboard.js
+    │   │   ├── Layout
+    │   │   │   ├── Layout.js
+    │   │   │   └── Navbar.js
+    │   │   ├── Products
+    │   │   │   ├── AddProductForm.js
+    │   │   │   ├── EditProductForm.js
+    │   │   │   └── ProductList.js
+    │   │   ├── Suppliers
+    │   │   │   ├── AddSupplierForm.js
+    │   │   │   ├── EditSupplierForm.js
+    │   │   │   └── SupplierList.js
+    │   │   └── common
+    │   │   │   └── ExportImport.js
+    │   ├── context
+    │   │   └── AuthContext.js
+    │   ├── theme
+    │   │   └── theme.js
+    │   ├── App.js
+    │   └── index.js
+    ├── README.md
+    ├── package-lock.json
+    └── package.json
+├── installer
+    ├── index.js
+    ├── package-lock.json
+    ├── package.json
+    └── setup-database.js
+├── LICENSE
+├── README.md
+├── inventory-installer.exe
+├── output_file.txt
+├── package-lock.json
+├── package.json
+├── project_structure.txt
+└── tree.py
