@@ -1,0 +1,13 @@
+{
+    "name": "inventory-installer",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "axios": "^0.27.2",
+        "inquirer": "8.2.5",
+        "inventory-installer": "file:",
+        "shelljs": "0.8.5"
+    }
+}
