@@ -60,7 +60,6 @@ const AddProductForm = ({ onProductsAdded }) => {
                 max_quantity: '',
             });
         } catch (error) {
-            console.error('Error adding product:', error);
             alert(error.response?.data?.error || error.message || 'Error adding product');
         }
     };
@@ -111,7 +110,7 @@ const AddProductForm = ({ onProductsAdded }) => {
                                 margin="normal"
                                 required
                                 type="number"
-                                slotProps={{ min: "0" }}
+                                slotProps={{ htmlInput: { min: 0 } }}
                         />
                         <TextField
                                 fullWidth
@@ -121,7 +120,7 @@ const AddProductForm = ({ onProductsAdded }) => {
                                 margin="normal"
                                 required
                                 type="number"
-                                slotProps={{ min: "0", step: "0.01" }}
+                                slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
                         />
                         <TextField
                                 fullWidth
@@ -131,7 +130,7 @@ const AddProductForm = ({ onProductsAdded }) => {
                                 margin="normal"
                                 required
                                 type="number"
-                                slotProps={{ min: "1" }}
+                                slotProps={{ htmlInput: { min: 1 } }}
                         />
                         <TextField
                                 fullWidth
@@ -141,7 +140,7 @@ const AddProductForm = ({ onProductsAdded }) => {
                                 margin="normal"
                                 required
                                 type="number"
-                                slotProps={{ min: "0" }}
+                                slotProps={{ htmlInput: { min: 0 } }}
                         />
                         <TextField
                                 fullWidth
@@ -151,7 +150,7 @@ const AddProductForm = ({ onProductsAdded }) => {
                                 margin="normal"
                                 required
                                 type="number"
-                                slotProps={{ min: "0" }}
+                                slotProps={{ htmlInput: { min: 0 } }}
                         />
                     </Box>
                 </DialogContent>

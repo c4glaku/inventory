@@ -12,9 +12,24 @@ import { Link as RouterLink } from 'react-router-dom';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 
 const Navbar = ({ darkMode, toggleDarkMode }) => {
+    const { isAuthenticated, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate('/login', { replace: true });
+        } catch {
+            window.alert('Sign out failed. Check your connection and try again.');
+        }
+    };
+
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static" sx={{ height: '70px' }}>
@@ -33,15 +48,18 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                         Inventory Dashboard
                     </Typography>
                     <Stack direction="row" spacing={2}>
-                        <Button color="inherit" component={RouterLink} to="/">
-                            Dashboard
-                        </Button>
-                        <Button color="inherit" component={RouterLink} to="/products">
-                            Products
-                        </Button>
-                        <Button color="inherit" component={RouterLink} to="/suppliers">
-                            Suppliers
-                        </Button>
+                        {isAuthenticated ? (
+                            <>
+                                <Button color="inherit" component={RouterLink} to="/">Dashboard</Button>
+                                <Button color="inherit" component={RouterLink} to="/products">Products</Button>
+                                <Button color="inherit" component={RouterLink} to="/suppliers">Suppliers</Button>
+                                <Button color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>
+                                    Sign out
+                                </Button>
+                            </>
+                        ) : (
+                            <Button color="inherit" component={RouterLink} to="/login">Sign in</Button>
+                        )}
                         <IconButton 
                             color="inherit"
                             onClick={toggleDarkMode}

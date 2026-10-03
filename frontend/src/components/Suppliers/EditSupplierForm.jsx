@@ -26,7 +26,6 @@ const EditSupplierForm = ({ supplier, open, onClose, onSupplierUpdated }) => {
             onSupplierUpdated(response.data);
             onClose();
         } catch (error) {
-            console.error('Error updating supplier:', error);
             alert(error.response?.data?.error || error.message || 'Error updating supplier');
         }
     };

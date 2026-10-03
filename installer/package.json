@@ -1,13 +1,17 @@
 {
-    "name": "inventory-installer",
-    "version": "1.0.0",
-    "scripts": {
-        "start": "node index.js"
-    },
-    "dependencies": {
-        "axios": "^0.27.2",
-        "inquirer": "8.2.5",
-        "inventory-installer": "file:",
-        "shelljs": "0.8.5"
-    }
+  "name": "inventory-installer",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "node index.mjs"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.7.2",
+    "bcryptjs": "^3.0.3",
+    "pg": "^8.23.1"
+  }
 }

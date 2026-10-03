@@ -34,15 +34,13 @@ const ProductList = () => {
             setLoading(true);
             setError(null);
             const response = await api.get('/products');
-            // console.log('API Response:', response); // for debugging purposes
             if (response.data) {
                 setProducts(response.data);
             } else {
                 setError('No data received from server');
             }
         } catch (error) {
-            console.error('Error fetching products:', error);
-            setError(error.message || 'Error fetching products');
+            setError(error.response?.data?.message || 'Error fetching products');
         } finally {
             setLoading(false);
         }
@@ -53,18 +51,16 @@ const ProductList = () => {
             await api.delete(`/products/${id}`);
             fetchProducts();
         } catch (error) {
-            console.error('Error deleting product:', error);
-            setError(error.message || 'Error deleting product');
+            setError(error.response?.data?.error || error.response?.data?.message || 'Error deleting product');
         }
     };
 
     const handleEdit = (product) => {
-        console.log('Editing product:', product);
         setEditingProduct(product);
     };
 
     const handleProductUpdated = (updatedProduct) => {
-        setProducts(products.map(p => 
+        setProducts(current => current.map(p =>
             p.id === updatedProduct.id ? updatedProduct : p
         ));
     };
@@ -87,7 +83,7 @@ const ProductList = () => {
                 onImportSuccess={fetchProducts}
             />
             <AddProductForm onProductsAdded={(newProduct) => {
-                setProducts([...products, newProduct]);
+                setProducts(current => [...current, newProduct]);
             }} />
             {(!products || products.length === 0) ? (
                 <Alert severity="info">No products found</Alert>

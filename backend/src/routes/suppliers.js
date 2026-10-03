@@ -1,96 +1,94 @@
 const express = require('express');
-const router = express.Router();
 const { db } = require('../config/database');
+const { id, supplier } = require('../lib/validation');
 
-// GET /api/suppliers
+const router = express.Router();
+const SUPPLIER_COLUMNS = `id, name, contact_name, email, phone, address, created_at, updated_at`;
+
 router.get('/', async (req, res, next) => {
     try {
-        const suppliers = await db.any('SELECT * FROM suppliers');
+        const suppliers = await db.any(`SELECT ${SUPPLIER_COLUMNS} FROM suppliers ORDER BY name, id`);
         res.json(suppliers);
     } catch (error) {
         next(error);
     }
 });
 
-// GET /api/suppliers/:id
 router.get('/:id', async (req, res, next) => {
     try {
-        const supplier = await db.one('SELECT * FROM suppliers WHERE id = $1', [req.params.id]);
-        res.json(supplier);
+        const supplierId = id(req.params.id, 'Supplier ID');
+        const found = await db.oneOrNone(
+            `SELECT ${SUPPLIER_COLUMNS} FROM suppliers WHERE id = $1`,
+            [supplierId]
+        );
+        if (!found) return res.status(404).json({ error: 'Supplier not found.' });
+        return res.json(found);
     } catch (error) {
-        if (error.code === 0) {
-            res.status(404).json({ error: 'Supplier not found' });
-        } else {
-            next(error);
-        }
+        return next(error);
     }
 });
 
-// POST /api/suppliers
 router.post('/', async (req, res, next) => {
     try {
-        const { name, contact_name, email, phone, address, } = req.body;
-
-        if (!name) {
-            return res.status(400).json({ error: 'Name is required' });
-        }
-
-        const newSupplier = await db.one(
-            `INSERT INTO suppliers
-            (name, contact_name, email, phone, address)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING *`,
-            [name, contact_name, email, phone, address]
+        const data = supplier(req.body);
+        const created = await db.one(
+            `INSERT INTO suppliers (name, contact_name, email, phone, address)
+             VALUES ($1, $2, $3, $4, $5)
+             RETURNING ${SUPPLIER_COLUMNS}`,
+            [data.name, data.contact_name, data.email, data.phone, data.address]
         );
-
-        res.status(201).json(newSupplier);
+        return res.status(201).json(created);
     } catch (error) {
-        next(error);
+        return next(error);
     }
 });
 
-// PUT /api/suppliers/:id
 router.put('/:id', async (req, res, next) => {
     try {
-        const { name, contact_name, email, phone, address } = req.body;
-
-        const updatedSupplier = await db.one(
+        const supplierId = id(req.params.id, 'Supplier ID');
+        const data = supplier(req.body);
+        const updated = await db.oneOrNone(
             `UPDATE suppliers
-            SET name = $1, contact_name = $2, email = $3,
-                phone = $4, address = $5, updated_at = CURRENT_TIMESTAMP
-            WHERE id = $6
-            RETURNING *`,
-            [name, contact_name, email, phone, address, req.params.id]
+             SET name = $1, contact_name = $2, email = $3,
+                 phone = $4, address = $5, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $6
+             RETURNING ${SUPPLIER_COLUMNS}`,
+            [data.name, data.contact_name, data.email, data.phone, data.address, supplierId]
         );
-        res.json(updatedSupplier);
+        if (!updated) return res.status(404).json({ error: 'Supplier not found.' });
+        return res.json(updated);
     } catch (error) {
-        if (error.code === 0) {
-            res.status(404).json({ error: 'Supplier not found' });
-        } else {
-            next(error);
-        }
+        return next(error);
     }
 });
 
-// DELETE /api/suppliers/:id
 router.delete('/:id', async (req, res, next) => {
     try {
-        const products = await db.any('SELECT id FROM products WHERE supplier_id = $1', [req.params.id]);
+        const supplierId = id(req.params.id, 'Supplier ID');
+        const deleted = await db.tx(async transaction => {
+            const existing = await transaction.oneOrNone(
+                'SELECT id FROM suppliers WHERE id = $1 FOR UPDATE',
+                [supplierId]
+            );
+            if (!existing) return { missing: true };
 
-        if (products.length > 0) {
-            return res.status(400).json({
-                error: 'Cannot delete supplier with associated products'
-            });
-        }
+            const products = await transaction.one(
+                'SELECT EXISTS (SELECT 1 FROM products WHERE supplier_id = $1) AS found',
+                [supplierId]
+            );
+            if (products.found) return { hasProducts: true };
 
-        const result = await db.result('DELETE FROM suppliers WHERE id = $1', [req.params.id]);
-        if (result.rowCount === 0) {
-            return res.status(404).json({ error: 'Supplier not found' });
+            await transaction.none('DELETE FROM suppliers WHERE id = $1', [supplierId]);
+            return { deleted: true };
+        });
+
+        if (deleted.missing) return res.status(404).json({ error: 'Supplier not found.' });
+        if (deleted.hasProducts) {
+            return res.status(409).json({ error: 'Cannot delete a supplier with associated products.' });
         }
-        res.status(204).send();
+        return res.status(204).end();
     } catch (error) {
-        console.error('Delete error:', error);
-        next(error);
+        return next(error);
     }
 });
 

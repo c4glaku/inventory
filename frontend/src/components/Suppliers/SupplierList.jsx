@@ -34,15 +34,13 @@ const SupplierList = () => {
             setLoading(true);
             setError(null);
             const response = await api.get('/suppliers');
-            // console.log('API Response:', response);
             if (response.data) {
                 setSuppliers(response.data);
             } else {
                 setError('No data received from server');
             }
         } catch (error) {
-            console.error('Error fetching suppliers:', error);
-            setError(error.message || 'Error fetching suppliers');
+            setError(error.response?.data?.message || 'Error fetching suppliers');
         } finally {
             setLoading(false);
         }
@@ -53,8 +51,7 @@ const SupplierList = () => {
             await api.delete(`/suppliers/${id}`);
             fetchSuppliers();
         } catch (error) {
-            console.error('Error deleting supplier:', error);
-            setError(error.message || 'Error deleting supplier');
+            setError(error.response?.data?.error || error.response?.data?.message || 'Error deleting supplier');
         }
     };
 
@@ -63,7 +60,7 @@ const SupplierList = () => {
     };
 
     const handleSupplierUpdated = (updatedSupplier) => {
-        setSuppliers(suppliers.map(s =>
+        setSuppliers(current => current.map(s =>
             s.id === updatedSupplier.id ? updatedSupplier : s
         ));
     };
@@ -86,7 +83,7 @@ const SupplierList = () => {
                 onImportSuccess={fetchSuppliers}
             />
             <AddSupplierForm onSuppliersAdded={(newSupplier) => {
-                setSuppliers([...suppliers, newSupplier]);
+                setSuppliers(current => [...current, newSupplier]);
             }} />
             {(!suppliers || suppliers.length === 0) ? (
                 <Alert severity="info">No suppliers found</Alert>

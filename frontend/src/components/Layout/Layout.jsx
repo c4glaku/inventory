@@ -18,7 +18,7 @@ const Layout = ({ children, darkMode, toggleDarkMode }) => {
                         p: 3,
                         borderRadius: 2,
                         bgcolor: 'background.paper',
-                        minHeihgt: '80vh',
+                        minHeight: '80vh',
                         boxShadow: 3,
                         transition: 'background-color 0.3s ease'
                     }}

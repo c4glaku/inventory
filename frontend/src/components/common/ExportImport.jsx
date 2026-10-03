@@ -21,9 +21,6 @@ const ExportImport = ({ type, onImportSuccess }) => {
     const handleExport = async (format) => {
         setError(null);
         try {
-            console.log(`Attempting ${format} export for type: ${type}`); // Debugging
-            console.log('API URL:', `/export/${format}/${type}`);     // Debugging
-            setError(null);
             if (format === 'json') {
                 const response = await api.get(`/export/json/${type}`);
                 const blob = new Blob([JSON.stringify(response.data, null, 2)], {
@@ -37,8 +34,7 @@ const ExportImport = ({ type, onImportSuccess }) => {
                 downloadFile(response.data, `${type}.csv`);
             } 
         } catch (error) {
-            console.error('Export error:', error);
-            setError('Export failed. Please try again');
+            setError(error.response?.data?.error || error.response?.data?.message || 'Export failed. Please try again');
         }
     };
 
@@ -50,58 +46,40 @@ const ExportImport = ({ type, onImportSuccess }) => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+        window.setTimeout(() => window.URL.revokeObjectURL(url), 0);
     };
 
     const handleImport = async (event) => {
-        const file = event.target.files[0];
+        const input = event.currentTarget;
+        const file = input.files?.[0];
         if (!file) return;
     
         setImporting(true);
         setError(null);
     
-        // console.log('File type:', file.type, 'File name:', file.name); // debugging
-    
         try {
-            if (file.type === 'application/json' ||
-                file.name.toLowerCase().endsWith('.json')) {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        await api.post(`/import/json/${type}`, { data });
-                        onImportSuccess();
-                        setImportDialogOpen(false);
-                    } catch (error) {
-                        console.error('JSON import error:', error);
-                        setError('Invalid JSON file or import failed');
-                    } finally {
-                        setImporting(false);
-                    }
-                };
-                reader.readAsText(file);
-            } else if (
-                file.type === 'text/csv' || 
-                file.type === 'application/vnd.ms-excel' || 
-                file.name.toLowerCase().endsWith('.csv')
-                ) {
+            const extension = file.name.toLowerCase().split('.').pop();
+            if (extension === 'json') {
+                if (file.size > 2 * 1024 * 1024) throw new Error('JSON files must be 2 MB or smaller.');
+                const data = JSON.parse(await file.text());
+                await api.post(`/import/json/${type}`, { data });
+                onImportSuccess();
+                setImportDialogOpen(false);
+            } else if (extension === 'csv') {
+                if (file.size > 10 * 1024 * 1024) throw new Error('CSV files must be 10 MB or smaller.');
                 const formData = new FormData();
                 formData.append('file', file);
-                await api.post(`/import/csv/${type}`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                await api.post(`/import/csv/${type}`, formData);
                 onImportSuccess();
                 setImportDialogOpen(false);
             } else {
                 setError('Invalid file format');
             }
         } catch (error) {
-            console.error('Import error:', error);
-            setError('Import failed. Please try again');
+            setError(error.response?.data?.error || error.response?.data?.message || error.message || 'Import failed. Please try again');
         } finally {
             setImporting(false);
+            input.value = '';
         }
     };
 

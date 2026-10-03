@@ -1,129 +1,100 @@
 const express = require('express');
-const router = express.Router();
 const { db } = require('../config/database');
+const { InputError, id, product } = require('../lib/validation');
 
-// GET /api/products
+const router = express.Router();
+const PRODUCT_COLUMNS = `
+    id, name, description, sku, quantity, unit_price, supplier_id,
+    min_quantity, max_quantity, created_at, updated_at`;
+
+async function requireSupplier(supplierId) {
+    const supplier = await db.oneOrNone('SELECT id FROM suppliers WHERE id = $1', [supplierId]);
+    if (!supplier) throw new InputError('Supplier does not exist.');
+}
+
 router.get('/', async (req, res, next) => {
     try {
-        const products = await db.any('SELECT * FROM products');
+        const products = await db.any(`SELECT ${PRODUCT_COLUMNS} FROM products ORDER BY name, id`);
         res.json(products);
     } catch (error) {
         next(error);
     }
 });
 
-
-// GET /api/products/:id
 router.get('/:id', async (req, res, next) => {
     try {
-        const product = await db.one('SELECT * FROM products WHERE id = $1', [req.params.id]);
-        res.json(product);
+        const productId = id(req.params.id, 'Product ID');
+        const found = await db.oneOrNone(
+            `SELECT ${PRODUCT_COLUMNS} FROM products WHERE id = $1`,
+            [productId]
+        );
+        if (!found) return res.status(404).json({ error: 'Product not found.' });
+        return res.json(found);
     } catch (error) {
-        if (error.code === 0) {
-            res.status(404).json({ error: 'Product not found' });
-        } else {
-            next(error);
-        }
+        return next(error);
     }
 });
 
-// POST /api/products
 router.post('/', async (req, res, next) => {
     try {
-        const { name, 
-                description,
-                sku,
-                quantity, 
-                unit_price, 
-                supplier_id, 
-                min_quantity, 
-                max_quantity 
-            } = req.body;
-
-        if (!name || !sku) {
-            return res.status(400).json({ error: 'Name and SKU are required' });
-        }
-
-        const supplierExists = await db.oneOrNone('SELECT id FROM suppliers WHERE id = $1', [supplier_id]);
-        if (!supplierExists) {
-            return res.status(400).json({ error: 'Supplier does not exist' });
-        }
-
-        if (isNaN(quantity) || isNaN(unit_price) || isNaN(min_quantity) || isNaN(max_quantity)) {
-            return res.status(400).json({ error: 'Invalid numeric values provided' });
-        }
-
-        const newProduct = await db.one(
+        const data = product(req.body);
+        await requireSupplier(data.supplier_id);
+        const created = await db.one(
             `INSERT INTO products
-            (name, description, sku, quantity, unit_price, supplier_id, min_quantity, max_quantity)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING *`,
-            [
-                name, 
-                description, 
-                sku, 
-                parseInt(quantity), 
-                parseFloat(unit_price), 
-                parseInt(supplier_id), 
-                parseInt(min_quantity), 
-                parseInt(max_quantity)
-            ]
+                (name, description, sku, quantity, unit_price, supplier_id, min_quantity, max_quantity)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+             RETURNING ${PRODUCT_COLUMNS}`,
+            [data.name, data.description, data.sku, data.quantity, data.unit_price,
+                data.supplier_id, data.min_quantity, data.max_quantity]
         );
-        
-        res.status(201).json(newProduct);
+        return res.status(201).json(created);
     } catch (error) {
-        console.error('Error creating product:', error);
         if (error.code === '23505') {
-            res.status(400).json({ error: 'SKU already exists' });
-        } else if (error.code === 23503) {
-            res.status(400).json({ error: 'Invalid supplier ID' });
-        } else {
-            next(error);
+            return res.status(409).json({ error: 'SKU already exists.' });
         }
+        if (error.code === '23503') {
+            return res.status(400).json({ error: 'Supplier does not exist.' });
+        }
+        return next(error);
     }
 });
 
-// PUT /api/products/:id
 router.put('/:id', async (req, res, next) => {
     try {
-        const { name, description, sku, quantity, unit_price, supplier_id, min_quantity, max_quantity } = req.body;
-
-        if (!name || !sku) {
-            return res.status(400).json({ error: 'Name and SKU are required' });
-        }
-
-        if (isNaN(quantity) || isNaN(unit_price) || isNaN(min_quantity) || isNaN(max_quantity)) { 
-            return res.status(400).json({ error: 'Invalid numeric values provided' });
-        }
-
-        const supplierExists = await db.oneOrNone('SELECT id FROM suppliers WHERE id = $1', [supplier_id]);
-        const updatedProduct = await db.one(
+        const productId = id(req.params.id, 'Product ID');
+        const data = product(req.body);
+        await requireSupplier(data.supplier_id);
+        const updated = await db.oneOrNone(
             `UPDATE products
-            SET name = $1, description = $2, sku = $3, quantity = $4,
-                unit_price = $5, supplier_id = $6, min_quantity = $7,
-                max_quantity = $8, updated_at = CURRENT_TIMESTAMP
-            WHERE id = $9
-            RETURNING *`,
-            [name, description, sku, quantity, unit_price, supplier_id, min_quantity, max_quantity, req.params.id]
+             SET name = $1, description = $2, sku = $3, quantity = $4,
+                 unit_price = $5, supplier_id = $6, min_quantity = $7,
+                 max_quantity = $8, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $9
+             RETURNING ${PRODUCT_COLUMNS}`,
+            [data.name, data.description, data.sku, data.quantity, data.unit_price,
+                data.supplier_id, data.min_quantity, data.max_quantity, productId]
         );
-
-        res.json(updatedProduct);
+        if (!updated) return res.status(404).json({ error: 'Product not found.' });
+        return res.json(updated);
     } catch (error) {
-        if (error.code === 0) {
-            res.status(404).json({ error: 'Product not found' });
-        } else {
-            next(error);
+        if (error.code === '23505') {
+            return res.status(409).json({ error: 'SKU already exists.' });
         }
+        if (error.code === '23503') {
+            return res.status(400).json({ error: 'Supplier does not exist.' });
+        }
+        return next(error);
     }
 });
 
-// Delete /api/products/:id
 router.delete('/:id', async (req, res, next) => {
     try {
-        await db.none('DELETE FROM products WHERE id = $1', [req.params.id]);
-        res.status(204).send();
+        const productId = id(req.params.id, 'Product ID');
+        const result = await db.result('DELETE FROM products WHERE id = $1', [productId]);
+        if (result.rowCount === 0) return res.status(404).json({ error: 'Product not found.' });
+        return res.status(204).end();
     } catch (error) {
-        next(error);
+        return next(error);
     }
 });
 

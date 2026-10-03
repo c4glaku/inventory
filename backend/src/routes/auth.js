@@ -1,97 +1,123 @@
 const express = require('express');
-const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { db } = require('../config/database');
+const authMiddleware = require('../middleware/auth');
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const router = express.Router();
+const COOKIE_NAME = authMiddleware.COOKIE_NAME;
+const COOKIE_SAME_SITE = (process.env.COOKIE_SAME_SITE || 'strict').toLowerCase();
+const COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: COOKIE_SAME_SITE,
+    path: '/api',
+    maxAge: 60 * 60 * 1000,
+};
 
-router.post('/register', async (req, res) => {
-    const { username, password } = req.body;
+function issueSession(res, user) {
+    const token = jwt.sign(
+        { username: user.username },
+        process.env.JWT_SECRET,
+        {
+            algorithm: 'HS256',
+            subject: String(user.id),
+            expiresIn: '1h',
+        }
+    );
+    res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+}
 
-    if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required' });
+function validCredentials(username, password) {
+    return typeof username === 'string'
+        && username.trim().length >= 3
+        && username.trim().length <= 50
+        && typeof password === 'string'
+        && Buffer.byteLength(password, 'utf8') >= 12
+        && Buffer.byteLength(password, 'utf8') <= 72;
+}
+
+router.post('/register', async (req, res, next) => {
+    const { username, password } = req.body || {};
+    if (!validCredentials(username, password)) {
+        return res.status(400).json({
+            message: 'Username must be 3–50 characters and password must be 12–72 bytes.',
+        });
     }
 
     try {
-        const userExists = await db.query(
-            'SELECT * FROM users WHERE username = $1',
-            [username]
-        );
+        const normalizedUsername = username.trim();
+        const passwordHash = await bcrypt.hash(password, 12);
+        const user = await db.tx(async transaction => {
+            await transaction.query('SELECT pg_advisory_xact_lock(41823, 1)');
+            const { count } = await transaction.one(
+                'SELECT COUNT(*)::int AS count FROM users'
+            );
+            if (count > 0) return null;
 
-        if (userExists.length > 0) {
-            return res.status(400).json({ message: 'User already exists' });
+            return transaction.one(
+                `INSERT INTO users (username, password_hash)
+                 VALUES ($1, $2)
+                 RETURNING id, username`,
+                [normalizedUsername, passwordHash]
+            );
+        });
+
+        if (!user) {
+            return res.status(403).json({ message: 'Initial account setup is already complete.' });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const newUser = await db.query(
-            'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
-            [username, hashedPassword]
-        );
-
-        const payload = {
-            user: {
-                id: newUser[0].id,
-                username: newUser[0].username
-            }
-        };
-
-        jwt.sign(
-            payload,
-            JWT_SECRET,
-            { expiresIn: '1h' },
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token });
-            }
-        );
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
+        issueSession(res, user);
+        return res.status(201).json({ user });
+    } catch (error) {
+        if (error.code === '23505') {
+            return res.status(409).json({ message: 'Username is already in use.' });
+        }
+        return next(error);
     }
 });
 
-router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
+router.post('/login', async (req, res, next) => {
+    const { username, password } = req.body || {};
+    if (typeof username !== 'string'
+        || typeof password !== 'string'
+        || Buffer.byteLength(password, 'utf8') > 72) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
     try {
-        const user = await db.query(
-            'SELECT * FROM users WHERE username = $1',
-            [username]
+        const user = await db.oneOrNone(
+            'SELECT id, username, password_hash FROM users WHERE lower(username) = lower($1)',
+            [username.trim()]
         );
-
-        if (user.length === 0) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-
-        const isMatch = await bcrypt.compare(password, user[0].password_hash);
+        const isMatch = user
+            ? await bcrypt.compare(password, user.password_hash)
+            : false;
 
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const payload = {
-            user: {
-                id: user[0].id,
-                username: user[0].username
-            }
-        };
-
-        jwt.sign(
-            payload,
-            JWT_SECRET,
-            { expiresIn: '1h' },
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token });
-            }
-        );
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
+        const safeUser = { id: user.id, username: user.username };
+        issueSession(res, safeUser);
+        return res.json({ user: safeUser });
+    } catch (error) {
+        return next(error);
     }
+});
+
+router.get('/me', authMiddleware, (req, res) => {
+    res.json({ user: req.user });
+});
+
+router.post('/logout', (req, res) => {
+    res.clearCookie(COOKIE_NAME, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: COOKIE_SAME_SITE,
+        path: '/api',
+    });
+    res.status(204).end();
 });
 
 module.exports = router;

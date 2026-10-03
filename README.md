@@ -1,114 +1,90 @@
-<h1>Inventory Manager</h1>
-<h3>A full-stack inventory management system built with a Node/Express backend, PostgreSQL database, and a React frontend. Features include CRUD operations for products and suppliers, user authentication using JWT tokens, and import/export functionality (JSON & CSV).</h3>
+# Inventory Manager
 
-<h2><b>Tech Stack:</b></h2>
-<ul><b>Backend: </b> Node.js, Express, PostgreSQL</ul>
-<ul><b>Frontend: </b> React, Axios, React Router</ul>
-<ul><b>Authentication: </b> JWT</ul>
+A local inventory management app for products and suppliers. It includes a React dashboard, an Express API, PostgreSQL storage, JWT-backed sessions, and JSON/CSV import and export.
 
-<h2>Project Status</h2>
-<h3>Added final touches to the development build, now also supports import/export with JSON and CSV files.</h3>
-<h3>JWT authentication has been implemented.</h3>
-<h3>An installer has been added to set up the database and launch the project on first run.</h3>
-<h4>Last Updated: 2025/02/20</h4>
+## Requirements
 
-<h2>Setup Instructions</h2>
+- macOS, Windows, or Linux
+- Node.js 24 LTS recommended; Node.js 22.12 or newer is required
+- PostgreSQL 14 or newer, running locally or on a database host you can access
 
-<h2>Step 0</h2>
-<h2>Before setting up the inventory manager, make sure to download:</h2>
-<ul><b>PostgreSQL: </b>https://www.postgresql.org/download/</ul>
-<ul><b>(Optional but Recommended) Postman (or an equivalent software for testing purposes): </b>https://www.postman.com/downloads/</ul>
-<ul><b>Node.js: </b>https://nodejs.org/</ul>
+The old Windows-only installer has been replaced by a Node.js setup command that works across these operating systems. The app no longer needs the `psql` command line tool.
 
-<h2>Step 1: Running the Installer (First-Time Setup)</h2>
-<h3>The installer sets up the database and prompts for:</h3>
-<ul>
-<li>PostgreSQL superuser password</li>
-<li>A JWT secret key</li>
-<li>Admin username and password for JWT authentication</li>
-</ul>
-<h3>Run the installer executable:</h3>
+## First-time setup
 
-```console
-inventory-installer.exe
+From the project root:
+
+```sh
+npm ci
+npm run setup
+npm run dev
 ```
 
-<h3>Note:</h3>
-<ul>
-<li>The installer should only be run once. If you need to rerun it, you must manually drop the database first.</li>
-<li>After installation, the project will launch automatically. However, there is no integrated launcher yet, so for subsequent launches, you must start the backend and frontend manually.</li>
-</ul>
+Setup asks for the PostgreSQL administrator connection and database settings. It creates a separate, non-superuser application role, initializes the schema without dropping existing tables, and asks for an initial admin account if the database has no users. It writes the generated database password and JWT signing key to `backend/.env`; on macOS/Linux the file is restricted to the current user, while Windows uses the project directory's filesystem ACL. Keep that file private.
 
-<h2>Step 2: Running the Application Manually (Post-Installation)</h2>
-<h3>Starting the Backend</h3>
-From the backend directory, run:
+Open <http://localhost:5173>. The API listens on <http://127.0.0.1:3000>.
 
-```console
-npm install
-```
-Once all modules are installed, start the backend:
+To run an existing installation, start with `npm ci` and `npm run dev`. If the existing `backend/.env` uses a short JWT secret, replace it with at least 32 random bytes first. Setup refuses to overwrite an existing `.env`; move it to a secure backup outside the repository before running setup again. If you are upgrading from an older clone, back up `backend/.env` before pulling: it was tracked previously, and Git may remove it from the working tree as part of this update. The new setup keeps product, supplier, and user rows when it initializes an existing database.
 
-```console
-npm start
-```
-At this point, the server should be running on port 3000 (or a different port if configured in .env).
+To create a random JWT secret manually, use `openssl rand -base64 48` on macOS/Linux or:
 
-<h3>Starting the Frontend</h3>
-From the frontend directory, run:
-
-```console
-npm install
+```powershell
+node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"
 ```
 
-Once all installs are done, start the frontend:
+Copy [backend/.env.example](backend/.env.example) to `backend/.env` only when configuring the app manually. Set the database connection fields and replace the example JWT secret before starting the API.
 
-```console
-npm start
+## Development and builds
+
+```sh
+npm run dev       # Start API and web app together
+npm run build     # Create the frontend production bundle in frontend/dist
+npm start         # Start only the API
 ```
 
-The frontend will run on `http://localhost:3001` (or another configured port).
+For a separately hosted frontend, set `VITE_API_URL` to the API base URL at build time and set `CORS_ORIGINS` in `backend/.env` to the exact frontend origin. Same-site subdomains work with the default strict cookie setting. A truly cross-site frontend also needs `COOKIE_SAME_SITE=none`, `NODE_ENV=production`, and HTTPS; browser third-party-cookie rules may still block this setup. For production, serving `frontend/dist` and proxying `/api` through the same origin is the simplest option. Set `DB_SSL=true` when the PostgreSQL provider requires TLS.
 
-<h2>Step 3: Setting Up the Database Manually (If Needed)</h2>
-If you need to manually set up the database, run psql:
+## Features
 
-```console
-Server [localhost]:
-Database [postgres]: inventory_db
-Port [5432]:
-Username [postgres]:
-Password for user postgres:
-```
+- Dashboard totals, low-stock count, and quantity chart
+- Product and supplier create, list, edit, and delete
+- JSON and CSV export and transactional imports
+- Light and dark themes
+- Case-insensitive login with an HTTP-only, `SameSite=Strict` session cookie
 
-Leave the Server, Port, and Username fields empty unless you have a custom setup. Enter your **PostgreSQL superuser password** (set during PostgreSQL installation). Once inside psql, run:
+CSV imports are limited to 10 MB and 5,000 rows; JSON requests are limited to 2 MB and 5,000 rows. CSV exports escape spreadsheet formula values. Imports validate all rows before committing them, so a failed import does not leave partial data.
 
-```console
-postgres=# \c inventory_db
-inventory_db=# \i C:/Users/YourUsername/Path/To/Your/backend/src/db/schema.sql
-```
+## API
 
-At this point, the database should be ready for use.
+All data routes require a valid session cookie. The first admin can be created during setup; the public registration endpoint closes after the first account is created.
 
-<h2>Step 4: API Testing</h2>
-The manager currently supports **GET, POST, and PUT** methods. You can test them on Postman.
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/health` | API health check |
+| `POST` | `/api/auth/login` | Start a session |
+| `POST` | `/api/auth/logout` | End a session |
+| `GET` | `/api/auth/me` | Return the current account |
+| `GET`, `POST` | `/api/products` | List or create products |
+| `GET`, `PUT`, `DELETE` | `/api/products/:id` | Read, update, or delete a product |
+| `GET`, `POST` | `/api/suppliers` | List or create suppliers |
+| `GET`, `PUT`, `DELETE` | `/api/suppliers/:id` | Read, update, or delete a supplier |
+| `GET` | `/api/export/json/:type` | Export products or suppliers as JSON |
+| `GET` | `/api/export/csv/:type` | Export products or suppliers as CSV |
+| `POST` | `/api/import/json/:type` | Import products or suppliers from JSON |
+| `POST` | `/api/import/csv/:type` | Import products or suppliers from CSV |
 
-<h3>API Endpoints:</h3>
-<ul>
-<li>Products: `http://localhost:3000/api/products`</li>
-<li>Suppliers: `http://localhost:3000/api/suppliers`</li>
-</ul>
+## Security notes
 
-<h2>Step 5: (Optional) Repackaging the Installer</h2>
-If you need to repackage the `.exe` installer, navigate to the `installer` directory, install dependencies, and run:
+- Passwords use bcrypt; passwords must be 12–72 UTF-8 bytes.
+- Session JWTs are stored in HTTP-only cookies and are never kept in browser local storage.
+- Login and registration are rate limited, CORS origins are restricted, and request bodies/uploads have size limits.
+- The schema uses idempotent table creation and never drops application data.
+- `.env` files and the old installer executable are excluded from the current repository snapshot.
 
-```console
-npm install
-pkg index.js --target node18-win-x64 --output ../inventory-installer.exe
-```
+**Credential rotation is required:** earlier commits included a PostgreSQL password and JWT secret in `backend/.env`. Removing the file from the current tree does not erase those values from old Git history or existing clones. Replace the old PostgreSQL password and JWT secret before relying on this repository. Old browser sessions should be considered invalid after the signing key changes. A normal pull or push does not rewrite prior commits.
 
-<h2>Final Notes</h2>
-- The installer **should only be run once** unless the database is manually dropped.
-- Currently, there is **no integrated launcher**, so you must start the backend and frontend manually each time.
-- Import/export functionality is available for JSON and CSV formats.
+## Data formats
 
-This application is still under development, but stay tuned for a full release!
+Product CSV columns: `Name`, `Description`, `SKU`, `Quantity`, `Unit Price`, `Supplier ID`, `Minimum Quantity`, `Maximum Quantity`.
 
+Supplier CSV columns: `Name`, `Contact Name`, `Email`, `Phone`, `Address`.

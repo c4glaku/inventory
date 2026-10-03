@@ -29,7 +29,7 @@ const AddSupplierForm = ({ onSuppliersAdded }) => {
             setOpen(false);
             setFormData({ name: '', contact_name: '', email: '', phone: '', address: '' });
         } catch (error) {
-            console.error('Error adding supplier:', error);
+            alert(error.response?.data?.error || error.response?.data?.message || 'Error adding supplier');
         }
     };
 
