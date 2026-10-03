@@ -3,6 +3,12 @@ node_modules/
 
 # Environment
 .env
+.env.*
+!.env.example
+
+# Local application configuration
+backend/.env
+frontend/.env
 
 # Logs
 logs
@@ -27,3 +33,4 @@ build/
 # Misc
 tree.py
 project_structure.txt
+inventory-installer.exe
