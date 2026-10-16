@@ -9,6 +9,7 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [showRecovery, setShowRecovery] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -69,6 +70,20 @@ const Login = () => {
                     <Button type="submit" fullWidth variant="contained" disabled={submitting} sx={{ mt: 3 }}>
                         {submitting ? 'Signing in…' : 'Sign In'}
                     </Button>
+                    <Button
+                        type="button"
+                        fullWidth
+                        color="inherit"
+                        onClick={() => setShowRecovery(current => !current)}
+                        sx={{ mt: 1, textTransform: 'none' }}
+                    >
+                        Forgot your password?
+                    </Button>
+                    {showRecovery && (
+                        <Alert severity="info" sx={{ mt: 1 }}>
+                            For this local installation, run <code>npm run reset-password</code> from the project root. This updates your account password without changing inventory data.
+                        </Alert>
+                    )}
                 </Box>
             </Paper>
         </Box>
