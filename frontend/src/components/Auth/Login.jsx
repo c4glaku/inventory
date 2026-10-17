@@ -65,12 +65,6 @@ const Login = () => {
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={event => setPassword(event.target.value)}
-                        onKeyDown={event => {
-                            if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
-                                event.preventDefault();
-                                if (!submitting) event.currentTarget.form?.requestSubmit();
-                            }
-                        }}
                         margin="normal"
                         required
                         autoComplete="current-password"
