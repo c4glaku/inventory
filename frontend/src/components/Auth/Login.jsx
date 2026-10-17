@@ -33,6 +33,13 @@ const Login = () => {
         }
     };
 
+    const handlePasswordKeyDown = event => {
+        if (event.key !== 'Enter' || event.nativeEvent.isComposing) return;
+
+        event.preventDefault();
+        if (!submitting) event.currentTarget.form?.requestSubmit();
+    };
+
     return (
         <Box
             sx={{
@@ -69,6 +76,9 @@ const Login = () => {
                         required
                         autoComplete="current-password"
                         slotProps={{
+                            htmlInput: {
+                                onKeyDown: handlePasswordKeyDown,
+                            },
                             input: {
                                 endAdornment: (
                                     <InputAdornment position="end">
