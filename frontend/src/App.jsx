@@ -9,6 +9,7 @@ import { lightTheme, darkTheme } from './theme/theme';
 
 const Login = React.lazy(() => import('./components/Auth/Login'));
 const Dashboard = React.lazy(() => import('./components/Dashboard/Dashboard'));
+const Statistics = React.lazy(() => import('./components/Dashboard/Statistics'));
 const ProductList = React.lazy(() => import('./components/Products/ProductList'));
 const SupplierList = React.lazy(() => import('./components/Suppliers/SupplierList'));
 
@@ -42,6 +43,7 @@ function App() {
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                                <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
                                 <Route path="/products" element={<ProtectedRoute><ProductList /></ProtectedRoute>} />
                                 <Route path="/suppliers" element={<ProtectedRoute><SupplierList /></ProtectedRoute>} />
                             </Routes>
