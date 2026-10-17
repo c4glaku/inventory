@@ -24,6 +24,12 @@ Setup asks for the PostgreSQL administrator connection and database settings. It
 
 Open <http://localhost:5173>. The API listens on <http://127.0.0.1:3000>.
 
+### Import the sample inventory
+
+After signing in, import [sample_files/suppliers.csv](sample_files/suppliers.csv) from the Suppliers page first, then import [sample_files/products.csv](sample_files/products.csv) from the Products page. Products require a numeric `Supplier ID` that already exists; the importer does not match suppliers by name. The Suppliers page displays each assigned ID.
+
+The sample product file expects supplier IDs 1–24, which are assigned when the sample supplier file is imported into an empty supplier table with a fresh ID sequence. If the database already has suppliers, update the product file's `Supplier ID` values to match the IDs in your Suppliers list before importing. Imports append records; they do not replace existing data. See [sample_files/README.md](sample_files/README.md) for details.
+
 To run an existing installation, start with `npm ci` and `npm run dev`. If the existing `backend/.env` uses a short JWT secret, replace it with at least 32 random bytes first. Setup refuses to overwrite an existing `.env`; move it to a secure backup outside the repository before running setup again. If you are upgrading from an older clone, back up `backend/.env` before pulling: it was tracked previously, and Git may remove it from the working tree as part of this update. The new setup keeps product, supplier, and user rows when it initializes an existing database.
 
 To create a random JWT secret manually, use `openssl rand -base64 48` on macOS/Linux or:
