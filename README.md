@@ -2,6 +2,10 @@
 
 A local inventory management app for products and suppliers. It includes a React dashboard, an Express API, PostgreSQL storage, JWT-backed sessions, and JSON/CSV import and export.
 
+## Tech stack
+
+React 19 and Vite power the frontend, with Material UI, React Router, Axios, and Recharts. The API uses Node.js and Express 5, with PostgreSQL accessed through `pg-promise`.
+
 ## Requirements
 
 - macOS, Windows, or Linux
@@ -22,7 +26,7 @@ npm run dev
 
 Setup asks for the PostgreSQL administrator connection and database settings. It creates a separate, non-superuser application role, initializes the schema without dropping existing tables, and asks for an initial admin account if the database has no users. It writes the generated database password and JWT signing key to `backend/.env`; on macOS/Linux the file is restricted to the current user, while Windows uses the project directory's filesystem ACL. Keep that file private.
 
-Open <http://localhost:5173>. The API listens on <http://127.0.0.1:3000>.
+Open <http://localhost:5173>. The API listens on <http://127.0.0.1:3000>. Use `localhost` for the frontend URL: `127.0.0.1` is a different browser origin and is not in the default CORS allowlist. If you want to use another host or port, add that exact origin to `CORS_ORIGINS` in `backend/.env` and restart the API.
 
 ### Import the sample inventory
 
@@ -52,11 +56,17 @@ For a separately hosted frontend, set `VITE_API_URL` to the API base URL at buil
 
 ## Features
 
-- Dashboard totals, low-stock count, and quantity chart
+- Dashboard overview with product and supplier totals, a low-stock warning, and a top-five quantity chart
+- Statistics page with full-catalog totals, stock-health and supplier breakdowns, estimated inventory values, and searchable product details
 - Product and supplier create, list, edit, and delete
 - JSON and CSV export and transactional imports
 - Light and dark themes
-- Case-insensitive login with an HTTP-only, `SameSite=Strict` session cookie
+- Responsive navigation with a compact menu on smaller screens
+- Case-insensitive login with password visibility toggle, Enter-to-submit, and an HTTP-only, `SameSite=Strict` session cookie
+
+Statistics group products by supplier and stock health. Product categories and currency are not currently stored, so category reports and currency conversion are not available. Estimated stock value is quantity multiplied by the entered unit price; keep price units consistent when comparing values.
+
+For a forgotten local account password, run `npm run reset-password` from the project root. This changes the account password without deleting inventory data; see [docs/password-recovery.md](docs/password-recovery.md) for details. The sign-in page also points to this command. Password reset is a local command-line flow, not an email reset link.
 
 CSV imports are limited to 10 MB and 5,000 rows; JSON requests are limited to 2 MB and 5,000 rows. CSV exports escape spreadsheet formula values. Imports validate all rows before committing them, so a failed import does not leave partial data.
 
