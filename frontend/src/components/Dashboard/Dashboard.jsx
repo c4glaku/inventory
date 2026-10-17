@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Paper, Typography, Box } from '@mui/material';
+import { Alert, Button, Paper, Stack, Typography, Box } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../api/axios';
 
@@ -57,6 +58,36 @@ const Dashboard = () => {
 
     return (
         <>
+            <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                alignItems={{ xs: 'stretch', sm: 'center' }}
+                justifyContent="space-between"
+                spacing={2}
+                sx={{ mb: 3 }}
+            >
+                <Box>
+                    <Typography variant="h4" component="h1">Overview</Typography>
+                    <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                        A quick look at your current inventory.
+                    </Typography>
+                </Box>
+                <Button component={RouterLink} to="/statistics" variant="outlined">
+                    View detailed statistics
+                </Button>
+            </Stack>
+            {stats.lowStock > 0 && (
+                <Alert
+                    severity="warning"
+                    action={(
+                        <Button color="inherit" size="small" component={RouterLink} to="/products">
+                            Review products
+                        </Button>
+                    )}
+                    sx={{ mb: 3 }}
+                >
+                    {stats.lowStock} product{stats.lowStock === 1 ? '' : 's'} {stats.lowStock === 1 ? 'is' : 'are'} at or below the minimum stock level.
+                </Alert>
+            )}
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 3 }}>
                 {summaries.map(([label, value]) => (
                     <Paper key={label} sx={{ p: 3, textAlign: 'center' }}>

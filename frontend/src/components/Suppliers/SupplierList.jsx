@@ -92,6 +92,7 @@ const SupplierList = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
+                                <TableCell>ID</TableCell>
                                 <TableCell>Name</TableCell>
                                 <TableCell>Email</TableCell>
                                 <TableCell>Phone</TableCell>
@@ -101,6 +102,7 @@ const SupplierList = () => {
                         <TableBody>
                             {suppliers.map((supplier) => {
                                 return (<TableRow key={supplier.id}>
+                                    <TableCell>{supplier.id}</TableCell>
                                     <TableCell>{supplier.name}</TableCell>
                                     <TableCell>{supplier.email}</TableCell>
                                     <TableCell>{supplier.phone}</TableCell>

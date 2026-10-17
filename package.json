@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "setup": "npm run setup --workspace=installer",
+    "reset-password": "npm run reset-password --workspace=installer",
     "dev": "concurrently -k -n API,Web \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
     "build": "npm run build --workspace=frontend",
     "start": "npm run start --workspace=backend"

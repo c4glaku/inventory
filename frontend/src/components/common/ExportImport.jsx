@@ -115,6 +115,17 @@ const ExportImport = ({ type, onImportSuccess }) => {
                                 {error}
                             </Alert>
                         )}
+                        <Alert severity="info" sx={{ mb: 2 }}>
+                            {type === 'products' ? (
+                                <>
+                                    Import suppliers first. Each product's <strong>Supplier ID</strong> must match an existing supplier ID shown on the Suppliers page; the importer does not match suppliers by name. The included sample products expect IDs 1–24 after importing <code>sample_files/suppliers.csv</code> into an empty supplier table.
+                                </>
+                            ) : (
+                                <>
+                                    Import suppliers before products. The database assigns supplier IDs when these records are added; use those IDs in the products CSV.
+                                </>
+                            )}
+                        </Alert>
                         {importing ? (
                             <CircularProgress />
                         ) : (

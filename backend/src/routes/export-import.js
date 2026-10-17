@@ -164,7 +164,7 @@ router.post('/import/json/:type', validateType, async (req, res, next) => {
             return res.status(409).json({ error: 'Import contains a duplicate SKU.' });
         }
         if (error.code === '23503') {
-            return res.status(400).json({ error: 'Import contains an invalid supplier ID.' });
+            return res.status(400).json({ error: 'Product import references a Supplier ID that does not exist. Import suppliers first and check the Supplier ID values.' });
         }
         return next(error);
     }
@@ -201,7 +201,7 @@ router.post('/import/csv/:type', validateType, upload.single('file'), async (req
             return res.status(409).json({ error: 'Import contains a duplicate SKU.' });
         }
         if (error.code === '23503') {
-            return res.status(400).json({ error: 'Import contains an invalid supplier ID.' });
+            return res.status(400).json({ error: 'Product import references a Supplier ID that does not exist. Import suppliers first and check the Supplier ID values.' });
         }
         if (!error.status && !error.code) {
             return next(new InputError('CSV file could not be parsed. Check the headers and row format.'));
