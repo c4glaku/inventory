@@ -18,12 +18,24 @@ import api from '../../api/axios';
 import AddSupplierForm from './AddSupplierForm';
 import EditSupplierForm from './EditSupplierForm';
 import ExportImport from '../common/ExportImport';
+import SortableTableCell from '../common/SortableTableCell';
+import { useTableSort } from '../../hooks/useTableSort';
+
+const defaultSupplierSort = { property: 'name', direction: 'asc' };
+const getSupplierSortValue = (supplier, property) => (
+    property === 'id' ? Number(supplier.id) : supplier[property]
+);
 
 const SupplierList = () => {
     const [suppliers, setSuppliers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editingSupplier, setEditingSupplier] = useState(null);
+    const { sortedRows, sortBy, sortDirection, requestSort } = useTableSort(
+        suppliers,
+        defaultSupplierSort,
+        getSupplierSortValue
+    );
 
     useEffect(() => {
         fetchSuppliers();
@@ -92,15 +104,39 @@ const SupplierList = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>ID</TableCell>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Email</TableCell>
-                                <TableCell>Phone</TableCell>
+                                <SortableTableCell
+                                    label="ID"
+                                    property="id"
+                                    sortBy={sortBy}
+                                    sortDirection={sortDirection}
+                                    onSort={requestSort}
+                                />
+                                <SortableTableCell
+                                    label="Name"
+                                    property="name"
+                                    sortBy={sortBy}
+                                    sortDirection={sortDirection}
+                                    onSort={requestSort}
+                                />
+                                <SortableTableCell
+                                    label="Email"
+                                    property="email"
+                                    sortBy={sortBy}
+                                    sortDirection={sortDirection}
+                                    onSort={requestSort}
+                                />
+                                <SortableTableCell
+                                    label="Phone"
+                                    property="phone"
+                                    sortBy={sortBy}
+                                    sortDirection={sortDirection}
+                                    onSort={requestSort}
+                                />
                                 <TableCell>Actions</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {suppliers.map((supplier) => {
+                            {sortedRows.map((supplier) => {
                                 return (<TableRow key={supplier.id}>
                                     <TableCell>{supplier.id}</TableCell>
                                     <TableCell>{supplier.name}</TableCell>

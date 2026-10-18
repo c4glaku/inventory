@@ -24,6 +24,8 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
+import SortableTableCell from '../common/SortableTableCell';
+import { useTableSort } from '../../hooks/useTableSort';
 import {
     Bar,
     BarChart,
@@ -73,6 +75,31 @@ const stockColors = {
     'Out of stock': '#d32f2f',
     'Low stock': '#ed6c02',
     'In stock': '#2e7d32',
+};
+
+const getStatisticsSortValue = (row, property) => {
+    if ([
+        'productCount',
+        'units',
+        'atOrBelowMinimum',
+        'stockValue',
+        'quantity',
+    ].includes(property)) {
+        return Number(row[property]);
+    }
+    if (property === 'unitPrice' || property === 'value') {
+        return row[property] === null ? null : Number(row[property]);
+    }
+    return row[property];
+};
+
+const productSortLabels = {
+    name: 'product name',
+    supplierName: 'supplier',
+    quantity: 'quantity',
+    unitPrice: 'unit price',
+    value: 'stock value',
+    status: 'stock status',
 };
 
 const MetricCard = ({ label, value, detail, color = 'primary.main' }) => (
@@ -235,6 +262,17 @@ const Statistics = () => {
                 || first.name.localeCompare(second.name));
     }, [search, statusFilter, stats.productRows]);
 
+    const supplierTable = useTableSort(
+        stats.supplierRows,
+        null,
+        getStatisticsSortValue
+    );
+    const productTable = useTableSort(
+        filteredProducts,
+        null,
+        getStatisticsSortValue
+    );
+
     const stockStatusData = Object.entries(stats.stockCounts)
         .map(([name, value]) => ({ name, value }))
         .filter(item => item.value > 0);
@@ -367,17 +405,51 @@ const Statistics = () => {
                         <Table size="small" stickyHeader>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Supplier</TableCell>
-                                    <TableCell align="right">Products</TableCell>
-                                    <TableCell align="right">Units</TableCell>
-                                    <TableCell align="right">At/below min.</TableCell>
-                                    <TableCell align="right">Stock value</TableCell>
+                                    <SortableTableCell
+                                        label="Supplier"
+                                        property="name"
+                                        sortBy={supplierTable.sortBy}
+                                        sortDirection={supplierTable.sortDirection}
+                                        onSort={supplierTable.requestSort}
+                                    />
+                                    <SortableTableCell
+                                        label="Products"
+                                        property="productCount"
+                                        align="right"
+                                        sortBy={supplierTable.sortBy}
+                                        sortDirection={supplierTable.sortDirection}
+                                        onSort={supplierTable.requestSort}
+                                    />
+                                    <SortableTableCell
+                                        label="Units"
+                                        property="units"
+                                        align="right"
+                                        sortBy={supplierTable.sortBy}
+                                        sortDirection={supplierTable.sortDirection}
+                                        onSort={supplierTable.requestSort}
+                                    />
+                                    <SortableTableCell
+                                        label="At/below min."
+                                        property="atOrBelowMinimum"
+                                        align="right"
+                                        sortBy={supplierTable.sortBy}
+                                        sortDirection={supplierTable.sortDirection}
+                                        onSort={supplierTable.requestSort}
+                                    />
+                                    <SortableTableCell
+                                        label="Stock value"
+                                        property="stockValue"
+                                        align="right"
+                                        sortBy={supplierTable.sortBy}
+                                        sortDirection={supplierTable.sortDirection}
+                                        onSort={supplierTable.requestSort}
+                                    />
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {stats.supplierRows.length === 0 ? (
                                     <TableRow><TableCell colSpan={5} align="center">No suppliers yet.</TableCell></TableRow>
-                                ) : stats.supplierRows.map(supplier => (
+                                ) : supplierTable.sortedRows.map(supplier => (
                                     <TableRow key={supplier.id} hover>
                                         <TableCell>
                                             <Typography variant="body2">{supplier.name}</Typography>
@@ -445,18 +517,60 @@ const Statistics = () => {
                 </Stack>
 
                 <Typography variant="caption" color="text.secondary">
-                    Showing {formatCount(filteredProducts.length)} of {formatCount(stats.productRows.length)} products, sorted by stock value.
+                    Showing {formatCount(productTable.sortedRows.length)} of {formatCount(stats.productRows.length)} products, ordered by{' '}
+                    {productTable.sortBy
+                        ? `${productSortLabels[productTable.sortBy]} ${productTable.sortDirection === 'asc' ? 'ascending' : 'descending'}`
+                        : 'stock value by default'}.
                 </Typography>
                 <TableContainer sx={{ mt: 1, maxHeight: 520 }}>
                     <Table size="small" stickyHeader>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Product</TableCell>
-                                <TableCell>Supplier</TableCell>
-                                <TableCell align="right">Quantity / minimum</TableCell>
-                                <TableCell align="right">Unit price</TableCell>
-                                <TableCell align="right">Stock value</TableCell>
-                                <TableCell>Stock status</TableCell>
+                                <SortableTableCell
+                                    label="Product"
+                                    property="name"
+                                    sortBy={productTable.sortBy}
+                                    sortDirection={productTable.sortDirection}
+                                    onSort={productTable.requestSort}
+                                />
+                                <SortableTableCell
+                                    label="Supplier"
+                                    property="supplierName"
+                                    sortBy={productTable.sortBy}
+                                    sortDirection={productTable.sortDirection}
+                                    onSort={productTable.requestSort}
+                                />
+                                <SortableTableCell
+                                    label="Quantity / minimum"
+                                    property="quantity"
+                                    align="right"
+                                    sortBy={productTable.sortBy}
+                                    sortDirection={productTable.sortDirection}
+                                    onSort={productTable.requestSort}
+                                />
+                                <SortableTableCell
+                                    label="Unit price"
+                                    property="unitPrice"
+                                    align="right"
+                                    sortBy={productTable.sortBy}
+                                    sortDirection={productTable.sortDirection}
+                                    onSort={productTable.requestSort}
+                                />
+                                <SortableTableCell
+                                    label="Stock value"
+                                    property="value"
+                                    align="right"
+                                    sortBy={productTable.sortBy}
+                                    sortDirection={productTable.sortDirection}
+                                    onSort={productTable.requestSort}
+                                />
+                                <SortableTableCell
+                                    label="Stock status"
+                                    property="status"
+                                    sortBy={productTable.sortBy}
+                                    sortDirection={productTable.sortDirection}
+                                    onSort={productTable.requestSort}
+                                />
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -466,7 +580,7 @@ const Statistics = () => {
                                         No products match the selected search and stock status.
                                     </TableCell>
                                 </TableRow>
-                            ) : filteredProducts.map(product => (
+                            ) : productTable.sortedRows.map(product => (
                                 <TableRow key={product.id} hover>
                                     <TableCell>
                                         <Typography variant="body2">{product.name}</Typography>

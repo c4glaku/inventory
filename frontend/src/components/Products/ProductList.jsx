@@ -18,12 +18,30 @@ import api from '../../api/axios';
 import AddProductForm from './AddProductForm';
 import EditProductForm from './EditProductForm';
 import ExportImport from '../common/ExportImport';
+import SortableTableCell from '../common/SortableTableCell';
+import { useTableSort } from '../../hooks/useTableSort';
+
+const defaultProductSort = { property: 'name', direction: 'asc' };
+const getProductSortValue = (product, property) => {
+    if (property === 'quantity') return Number(product.quantity);
+    if (property === 'unit_price') {
+        return product.unit_price === null || product.unit_price === ''
+            ? null
+            : Number(product.unit_price);
+    }
+    return product[property];
+};
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editingProduct, setEditingProduct] = useState(null);
+    const { sortedRows, sortBy, sortDirection, requestSort } = useTableSort(
+        products,
+        defaultProductSort,
+        getProductSortValue
+    );
 
     useEffect(() => {
         fetchProducts();
@@ -92,15 +110,39 @@ const ProductList = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Name</TableCell>
-                                <TableCell>SKU</TableCell>
-                                <TableCell>Quantity</TableCell>
-                                <TableCell>Unit Price</TableCell>
+                                <SortableTableCell
+                                    label="Name"
+                                    property="name"
+                                    sortBy={sortBy}
+                                    sortDirection={sortDirection}
+                                    onSort={requestSort}
+                                />
+                                <SortableTableCell
+                                    label="SKU"
+                                    property="sku"
+                                    sortBy={sortBy}
+                                    sortDirection={sortDirection}
+                                    onSort={requestSort}
+                                />
+                                <SortableTableCell
+                                    label="Quantity"
+                                    property="quantity"
+                                    sortBy={sortBy}
+                                    sortDirection={sortDirection}
+                                    onSort={requestSort}
+                                />
+                                <SortableTableCell
+                                    label="Unit Price"
+                                    property="unit_price"
+                                    sortBy={sortBy}
+                                    sortDirection={sortDirection}
+                                    onSort={requestSort}
+                                />
                                 <TableCell>Actions</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {products.map((product) => {
+                            {sortedRows.map((product) => {
                                 return (
                                     <TableRow key={product.id}>
                                     <TableCell>{product.name}</TableCell>

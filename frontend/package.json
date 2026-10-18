@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host localhost --port 5173",
     "build": "vite build",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test src/lib/tableSorting.test.js"
   },
   "engines": {
     "node": ">=22.12.0"

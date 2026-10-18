@@ -59,6 +59,7 @@ For a separately hosted frontend, set `VITE_API_URL` to the API base URL at buil
 - Dashboard overview with product and supplier totals, a low-stock warning, and a top-five quantity chart
 - Statistics page with full-catalog totals, stock-health and supplier breakdowns, estimated inventory values, and searchable product details
 - Product and supplier create, list, edit, and delete
+- Clickable sortable columns on product, supplier, and statistics tables, with a reset-to-default cycle
 - JSON and CSV export and transactional imports
 - Light and dark themes
 - Responsive navigation with a compact menu on smaller screens
